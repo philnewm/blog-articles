@@ -118,7 +118,7 @@ jobs:
           rm -Rf molecule
         working-directory: ./example
 
-      - name: Get molecule file
+      - name: Get ressources
         run: |
           curl -O "https://raw.githubusercontent.com/${{ github.repository }}/${{ env.BRANCH_REF }}/${{ env.RES_PATH }}/molecule.yml"
           curl -O "https://raw.githubusercontent.com/${{ github.repository }}/${{ env.BRANCH_REF }}/${{ env.RES_PATH }}/requirements.yml"
@@ -140,8 +140,8 @@ jobs:
       - name: Initialize vagrant scenario
         run: |
           molecule init scenario default --driver-name vagrant --provisioner-name ansible
-          cp ~/.venv/ansible_env/lib/python3.10/site-packages/molecule_plugins/vagrant/playbooks/create.yml molecule/default/create.yml
-          cp ~/.venv/ansible_env/lib/python3.10/site-packages/molecule_plugins/vagrant/playbooks/destroy.yml molecule/default/destroy.yml
+          cp ~/.venv/ansible_env/lib/python${{ env.PYTHON_VERSION }}/site-packages/molecule_plugins/vagrant/playbooks/create.yml molecule/default/create.yml
+          cp ~/.venv/ansible_env/lib/python${{ env.PYTHON_VERSION }}/site-packages/molecule_plugins/vagrant/playbooks/destroy.yml molecule/default/destroy.yml
           mv requirements.yml molecule/default/requirements.yml
           mv molecule.yml molecule/default/molecule.yml
           mv converge.yml molecule/default/converge.yml
