@@ -22,18 +22,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Set up Python {{ env.PYTHON_VERSION }}
+      - name: Set up Python ${{ env.PYTHON_VERSION }}$
         uses: actions/setup-python@v5
         with:
-          python-version: {{ env.PYTHON_VERSION }}
+          python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Install ubuntu dependencies
         run: |
-          sudo apt-get install python{{ env.PYTHON_VERSION }}-venv python3-pip -y
+          sudo apt-get install python{{ env.PYTHON_VERSION }}-venv python${{ env.PYTHON_VERSION }}$-pip -y
 
       - name: Create virtual environment
         run: |
-          python3.11 -m venv ~/.venv/ansible_env
+          python${{ env.PYTHON_VERSION }} -m venv ~/.venv/ansible_env
           source ~/.venv/ansible_env/bin/activate
 
       - name: Ensure global venv for this workflow
@@ -44,7 +44,7 @@ jobs:
 
       - name: Get requirements
         run: |
-          curl -O "https://raw.githubusercontent.com/${{ github.repository }}/{{ env.BRANCH_REF }}/{{ env.RES_PATH }}/requirements.txt"
+          curl -O "https://raw.githubusercontent.com/${{ github.repository }}/${{ env.BRANCH_REF }}/${{ env.RES_PATH }}/requirements.txt"
 
       - name: Install requirements
         run: |
@@ -120,12 +120,12 @@ jobs:
 
       - name: Get molecule file
         run: |
-          curl -O "https://raw.githubusercontent.com/${{ github.repository }}/{{ env.BRANCH_REF }}/{{ env.RES_PATH }}/molecule.yml"
-          curl -O "https://raw.githubusercontent.com/${{ github.repository }}/{{ env.BRANCH_REF }}/{{ env.RES_PATH }}/requirements.yml"
-          curl -O https://raw.githubusercontent.com/${{ github.repository }}/{{ env.BRANCH_REF }}/{{ env.RES_PATH }}/converge.yml
-          curl -O https://raw.githubusercontent.com/${{ github.repository }}/{{ env.BRANCH_REF }}/{{ env.RES_PATH }}/verify.yml
-          curl -O https://raw.githubusercontent.com/${{ github.repository }}/{{ env.BRANCH_REF }}/{{ env.RES_PATH }}/tasks.yml
-          curl -O https://raw.githubusercontent.com/${{ github.repository }}/{{ env.BRANCH_REF }}/{{ env.RES_PATH }}/tests.yml
+          curl -O "https://raw.githubusercontent.com/${{ github.repository }}/${{ env.BRANCH_REF }}/${{ env.RES_PATH }}/molecule.yml"
+          curl -O "https://raw.githubusercontent.com/${{ github.repository }}/${{ env.BRANCH_REF }}/${{ env.RES_PATH }}/requirements.yml"
+          curl -O https://raw.githubusercontent.com/${{ github.repository }}/${{ env.BRANCH_REF }}/${{ env.RES_PATH }}/converge.yml
+          curl -O https://raw.githubusercontent.com/${{ github.repository }}/${{ env.BRANCH_REF }}/${{ env.RES_PATH }}/verify.yml
+          curl -O https://raw.githubusercontent.com/${{ github.repository }}/${{ env.BRANCH_REF }}/${{ env.RES_PATH }}/tasks.yml
+          curl -O https://raw.githubusercontent.com/${{ github.repository }}/${{ env.BRANCH_REF }}/${{ env.RES_PATH }}/tests.yml
         working-directory: ./example
 
       - name: Create VirtualBox Host-Only Network
