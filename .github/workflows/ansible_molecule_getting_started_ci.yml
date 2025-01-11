@@ -1,0 +1,185 @@
+---
+
+name: getting-started-ci
+
+on:
+  push: 
+    branches: ["draft"]
+    paths-ignore:
+        - 'README.md'
+        - .gitignore
+
+permissions:
+  contents: read
+  
+env:
+  RES_PATH: "ansible/molecule_getting_started/ressources"
+  BRANCH_REF: "draft"
+
+jobs:
+  molecule-getting-started-ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install ubuntu dependencies
+        run: |
+          sudo apt-get install python3.10-venv python3-pip -y
+
+      - name: Create virtual environment
+        run: |
+          python3.10 -m venv ~/.venv/ansible_env
+          source ~/.venv/ansible_env/bin/activate
+
+      - name: Ensure global venv for this workflow
+        run: |
+          source ~/.venv/ansible_env/bin/activate
+          echo "$VIRTUAL_ENV/bin" >> $GITHUB_PATH
+          echo "VIRTUAL_ENV=$VIRTUAL_ENV" >> $GITHUB_ENV
+
+      - name: Get requirements
+        run: |
+          curl -O "https://raw.githubusercontent.com/${{ github.repository }}/{{ env.BRANCH_REF }}/{{ env.RES_PATH }}/requirements.txt"
+
+      - name: Install requirements
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Set environment variables for VirtualBox
+        run: |
+          echo "LOGNAME=$USER" >> $GITHUB_ENV
+          echo "USER=$(whoami)" >> $GITHUB_ENV
+
+      - name: Install Virtualbox 7.1.4
+        run: |
+          sudo sh -c 'echo "deb [arch=amd64 signed-by=/usr/share/keyrings/oracle-virtualbox-2016.gpg] https://download.virtualbox.org/virtualbox/debian $(lsb_release -sc) contrib" >> /etc/apt/sources.list'
+          wget -O- https://www.virtualbox.org/download/oracle_vbox_2016.asc | sudo gpg --yes --output /usr/share/keyrings/oracle-virtualbox-2016.gpg --dearmor
+          sudo apt-get update
+          sudo apt-get install virtualbox-7.1 -y
+
+      - name: Verify VirtualBox installation
+        run: VBoxManage --version
+
+      - name: Install vagrant on debian-based systems
+        run: |
+          wget -O- https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
+          echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
+          sudo apt-get update
+          sudo apt-get install vagrant -y
+
+      - name: Verify Vagrant installation
+        run: |
+          vagrant --version
+
+      - name: Setup role and molecule scenario
+        run: |
+          ansible-galaxy role init example
+          cd example
+          molecule init scenario
+
+      - name: Install yq
+        run: |
+          sudo wget https://github.com/mikefarah/yq/releases/download/v4.44.3/yq_linux_amd64 -O /usr/bin/yq && sudo chmod +x /usr/bin/yq
+
+      - name: Add role-name
+        run: |
+          yq e '.galaxy_info.role_name = "example"' -i meta/main.yml
+          yq e '.galaxy_info.namespace = "example_namespace"' -i meta/main.yml
+        working-directory: ./example
+
+      - name: Create default instance
+        run: |
+          molecule create
+        working-directory: ./example
+
+      - name: Verify default instance
+        run: |
+          molecule list
+        working-directory: ./example
+
+      - name: Destroy test instance
+        run: |
+          molecule destroy
+        working-directory: ./example
+
+      - name: Reset scenario
+        run: |
+          molecule reset
+        working-directory: ./example
+
+      - name: Clean molecule scenario
+        run: |
+          rm -Rf molecule
+        working-directory: ./example
+
+      - name: Get molecule file
+        run: |
+          curl -O "https://raw.githubusercontent.com/${{ github.repository }}/{{ env.BRANCH_REF }}/{{ env.RES_PATH }}/molecule.yml"
+          curl -O "https://raw.githubusercontent.com/${{ github.repository }}/{{ env.BRANCH_REF }}/{{ env.RES_PATH }}/requirements.yml"
+          curl -O https://raw.githubusercontent.com/${{ github.repository }}/{{ env.BRANCH_REF }}/{{ env.RES_PATH }}/converge.yml
+          curl -O https://raw.githubusercontent.com/${{ github.repository }}/{{ env.BRANCH_REF }}/{{ env.RES_PATH }}/verify.yml
+          curl -O https://raw.githubusercontent.com/${{ github.repository }}/{{ env.BRANCH_REF }}/{{ env.RES_PATH }}/tasks.yml
+          curl -O https://raw.githubusercontent.com/${{ github.repository }}/{{ env.BRANCH_REF }}/{{ env.RES_PATH }}/tests.yml
+        working-directory: ./example
+
+      - name: Create VirtualBox Host-Only Network
+        run: |
+          VBoxManage hostonlyif create
+          VBoxManage hostonlyif ipconfig vboxnet0 --ip 192.168.56.1 --netmask 255.255.255.0
+
+      - name: Display host only networks
+        run: |
+          VBoxManage list hostonlyifs
+
+      - name: Initialize vagrant scenario
+        run: |
+          molecule init scenario default --driver-name vagrant --provisioner-name ansible
+          cp ~/.venv/ansible_env/lib/python3.10/site-packages/molecule_plugins/vagrant/playbooks/create.yml molecule/default/create.yml
+          cp ~/.venv/ansible_env/lib/python3.10/site-packages/molecule_plugins/vagrant/playbooks/destroy.yml molecule/default/destroy.yml
+          mv requirements.yml molecule/default/requirements.yml
+          mv molecule.yml molecule/default/molecule.yml
+          mv converge.yml molecule/default/converge.yml
+          mv verify.yml molecule/default/verify.yml
+        working-directory: ./example
+
+      - name: Create vagrant instance
+        run: |
+          molecule create
+        working-directory: ./example
+
+      - name: Verify vagrant instance
+        run: |
+          molecule list
+        working-directory: ./example
+
+      - name: Set role tasks
+        run: |
+          mv tasks.yml tasks/main.yml
+        working-directory: ./example
+
+      - name: Converge vagrant instance
+        run: |
+          molecule converge
+        working-directory: ./example
+
+      - name: Set role tests
+        run: |
+          mv tests.yml tasks/tests.yml
+        working-directory: ./example
+
+      - name: Verify vagrant instance
+        run: |
+          molecule verify
+        working-directory: ./example
+
+      - name: Run test
+        run: |
+          molecule test
+        working-directory: ./example
+
+...
