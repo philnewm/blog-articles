@@ -9,6 +9,7 @@ on:
       - "publish"
     paths-ignore:
       - 'README.md'
+      - 'TODO.md'
       - .gitignore
 
 permissions:
