@@ -22,14 +22,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Set up Python ${{ env.PYTHON_VERSION }}$
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
         uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Install ubuntu dependencies
         run: |
-          sudo apt-get install python{{ env.PYTHON_VERSION }}-venv python${{ env.PYTHON_VERSION }}$-pip -y
+          sudo apt-get install python${{ env.PYTHON_VERSION }}-venv python${{ env.PYTHON_VERSION }}$-pip -y
 
       - name: Create virtual environment
         run: |
