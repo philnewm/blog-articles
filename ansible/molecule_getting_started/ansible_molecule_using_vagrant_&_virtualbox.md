@@ -38,14 +38,14 @@ It does however support remote controlling [Windows hosts](https://docs.ansible.
 You will need python >= 3.10 to install the latest versions of all required python packages.
 Additional the python-venv and python-pip package will be required.
 Here just the example install command for Ubuntu22.04
-`sudo apt-get install python3.10 python3.10-venv python3.10-pip`
+`sudo apt-get install python3.12 python3.12-venv python3-pip`
 
 > [!tip] Creating a [python virtual environment](https://realpython.com/python-virtual-environments-a-primer/) for Ansible first is highly recommended.
 
 ```reference
 title: "Create virtual environment"
-file: ./.github/workflows/run_code_snippets.yml
-start: 33
+file: ./.github/workflows/ansible_molecule_getting_started_ci.yml
+start: 38
 end: "+1"
 language: shell
 fold: true
