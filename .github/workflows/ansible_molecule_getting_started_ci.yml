@@ -32,7 +32,7 @@ jobs:
 
       - name: Create virtual environment
         run: |
-          python3.10 -m venv ~/.venv/ansible_env
+          python3.11 -m venv ~/.venv/ansible_env
           source ~/.venv/ansible_env/bin/activate
 
       - name: Ensure global venv for this workflow
