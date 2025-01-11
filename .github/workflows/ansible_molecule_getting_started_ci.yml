@@ -15,7 +15,7 @@ permissions:
   contents: read
   
 env:
-  RES_PATH: "ansible/molecule_getting_started/ressources"
+  RES_PATH: "ansible/molecule_getting_started/resources"
   BRANCH_REF: "draft"
   PYTHON_VERSION: "3.12"
 
