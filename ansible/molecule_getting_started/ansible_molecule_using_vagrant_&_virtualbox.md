@@ -59,7 +59,7 @@ Create a `requirements.txt` file containing these lines:
 
 ```reference
 title: "requirements.txt"
-file: ./ansible_molecule/getting_started/requirements.txt
+file: ./ansible/molecule_getting_started/resources/requirements.txt
 language: shell
 fold: true
 ln: true
@@ -72,9 +72,9 @@ ln: true
 Now you can run upgrade pip (just to be sure) and install the requirements.
 
 ```reference
-title: "Create virtual environment"
-file: ./.github/workflows/run_code_snippets.yml
-start: 48
+title: "Install requirements"
+file: ./.github/workflows/ansible_molecule_getting_started_ci.yml
+start: 53
 end: "+1"
 language: shell
 fold: true
@@ -96,8 +96,8 @@ See the following table for download pages and version used for the following ex
 
 ```reference
 title: "Install vagrant on debian-based systems"
-file: ./.github/workflows/run_code_snippets.yml
-start: 68
+file: ./.github/workflows/ansible_molecule_getting_started_ci.yml
+start: 73
 end: "+3"
 language: shell
 fold: true
@@ -138,8 +138,8 @@ This one doesn't exist anymore since version [6.0.0](https://github.com/ansible/
 
 ```reference
 title: "Setup role and molecule scenario"
-file: ./.github/workflows/run_code_snippets.yml
-start: 79
+file: ./.github/workflows/ansible_molecule_getting_started_ci.yml
+start: 84
 end: "+2"
 language: shell
 fold: true
@@ -224,7 +224,7 @@ Running `molecule reset` might result in a python-traceback related to docker on
 
 ```reference
 title: "molecule.yml"
-file: ./ansible_molecule/getting_started/molecule.yml
+file: ./ansible/molecule_getting_started/resources/molecule.yml
 language: yaml
 fold: true
 ln: true
@@ -244,8 +244,8 @@ You can find some explanation of all these settings in the [Ansible molecule doc
 
 ```reference
 title: "Initialize vagrant scenario"
-file: ./.github/workflows/run_code_snippets.yml
-start: 139
+file: ./.github/workflows/ansible_molecule_getting_started_ci.yml
+start: 144
 end: "+6"
 language: shell
 fold: true
@@ -277,7 +277,7 @@ This is just a very basic example for demonstration.
 
 ```reference
 title: "tasks.yml"
-file: ./ansible_molecule/getting_started/tasks.yml
+file: ./ansible/molecule_getting_started/resources/tasks.yml
 language: yaml
 fold: true
 ln: true
@@ -299,7 +299,7 @@ Take a look now at these test tasks which should be self-explanatory due to thei
 
 ```reference
 title: "tests.yml"
-file: ./ansible_molecule/getting_started/tests.yml
+file: ./ansible/molecule_getting_started/resources/tests.yml
 language: yaml
 fold: true
 ln: true
