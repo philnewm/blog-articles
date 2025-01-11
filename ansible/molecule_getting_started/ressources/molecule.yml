@@ -1,0 +1,31 @@
+---
+
+driver:
+  name: vagrant
+  provider:
+    name: virtualbox
+platforms:
+  # Defaults to Alpine Linux in case no box details are provided
+  - name: Alma9
+    box: almalinux/9
+    box_version: "9.5.20241203"
+    memory: 2048
+    cpus: 2
+    interfaces:
+      - auto_config: true
+        network_name: private_network
+        type: "static"
+        ip: "192.168.56.10"
+provisioner:
+  name: ansible
+  config_options:
+    defaults:
+      stdout_callback: debug
+      callbacks_enabled: ansible.posix.profile_tasks
+    env:
+      ANSIBLE_FORCE_COLOR: "true"
+verifier:
+  name: ansible
+  enabled: True
+
+...

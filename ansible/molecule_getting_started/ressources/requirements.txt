@@ -1,0 +1,4 @@
+ansible==10.6.0
+molecule==24.9.0
+molecule-plugins[vagrant]
+docker==7.1.0

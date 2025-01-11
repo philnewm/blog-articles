@@ -1,0 +1,35 @@
+---
+
+- name: Gather package facts
+  ansible.builtin.package_facts:
+
+- name: Gather service facts
+  ansible.builtin.service_facts:
+
+- name: Test Apache package is installed
+  ansible.builtin.assert:
+    that:
+      - "'httpd' in ansible_facts.packages"
+    fail_msg: "Apache package 'httpd' is not installed"
+    quiet: true
+
+- name: Test Apache service is running
+  ansible.builtin.assert:
+    that:
+      - ansible_facts.services['httpd.service'].state == 'running'
+    fail_msg: "Apache service is not running"
+    quiet: true
+
+- name: Query Apache default web page
+  ansible.builtin.uri:
+    url: "http://{{ ansible_all_ipv4_addresses[0] }}"
+  register: web_check
+
+- name: Test Apache is reachable
+  ansible.builtin.assert:
+    that:
+      - web_check.status == 200
+    fail_msg: "Web server is not reachable or did not return status code 200"
+    success_msg: "Web server is reachable and returned status code 200"
+
+...
