@@ -4,10 +4,12 @@ name: getting-started-ci
 
 on:
   push: 
-    branches: ["draft"]
+    branches: 
+      - "draft"
+      - "publish"
     paths-ignore:
-        - 'README.md'
-        - .gitignore
+      - 'README.md'
+      - .gitignore
 
 permissions:
   contents: read
