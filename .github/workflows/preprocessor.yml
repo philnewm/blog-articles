@@ -1,0 +1,85 @@
+---
+
+name: Blog-Preprocessor
+
+on:
+  workflow_run:
+      workflows:
+      - getting-started-ci
+      types:
+      - completed
+
+permissions:
+  contents: read
+
+env:
+  PYTHON_VERSION: "3.12"
+  FILE_NAME: "ansible_molecule_using_vagrant_and_virtualbox.md"
+  FILE_PATH: "ansible/molecule_getting_started/ansible_molecule_using_vagrant_and_virtualbox.md"
+  URL: "raw.githubusercontent.com/philnewm/blog-articles/refs/heads/draft"
+  OUTPUT_CODE: "output_code/ansible_molecule_using_vagrant_and_virtualbox.md.md"
+  OUTPUT_ADMONITIONS: "output_admonitions/ansible_molecule_using_vagrant_and_virtualbox.md.md"
+  TARGET_REPO: "philnewm.github.io"
+
+jobs:
+  convert-markdown:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Convert code and admonitions
+        uses: philnewm/markdown-conversion@main
+        with:
+          domain_url: ${{ env.URL }}
+          markdown_file_path: ${{ env.FILE_PATH }}
+          code: true
+          output_file_code: ${{ github.workspace }}/${{ env.OUTPUT_CODE }}
+          admonitions: true
+          output_file_admonitions: ${{ github.workspace }}/${{ env.OUTPUT_ADMONITIONS }}
+
+      - name: Upload gh_output
+        uses: actions/upload-artifact@v4
+        with:
+          name: gh_output
+          path: ${{ github.workspace }}/${{ env.OUTPUT_CODE }}
+          if-no-files-found: error
+
+      - name: Upload gh_output
+        uses: actions/upload-artifact@v4
+        with:
+          name: gh_output
+          path: ${{ github.workspace }}/${{ env.OUTPUT_CODE }}
+          if-no-files-found: error
+
+  push-to-pages-repo:
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'publish' }}
+    runs-on: ubuntu-latest
+    # TODO implement a query to identify text files needing to be updated
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          repository: philnewm/philnewm.github.io
+          token: ${{ secrets.PAGES_PAT }}
+          fetch-depth: 1
+
+      - name: Show current location
+        run: |
+          echo "Current working directory: $(pwd)"
+          echo "Files:"
+          ls -R
+
+      - name: Get artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: gh_output
+          path: ${{ github.workspace }}/${{ env.TARGET_REPO }}/site/docs/${{ env.FILE_NAME }}
+
+      - name: Push new file to pages repo
+        run: |
+          cd philnewm.github.io
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "[Automated] Add text file '${{ env.FILE_NAME }}' repository"
+          git push
+
+...
