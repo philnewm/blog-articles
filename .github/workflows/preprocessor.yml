@@ -72,7 +72,17 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: gh_output
-          path: ${{ github.workspace }}/${{ env.TARGET_REPO }}/site/docs
+          path: philnewm.github.io/site/tmp
+
+      - name: Move Artifact to Target Directory
+        run: |
+          mkdir -p philnewm.github.io/site/docs
+          mv philnewm.github.io/site/tmp/* ${{ github.workspace }}/${{ env.TARGET_REPO }}/site/docs
+
+      - name: Verify Artifact Location
+        run: |
+          echo "Files in site/docs:"
+          ls -l philnewm.github.io/site/docs
 
       - name: Push new file to pages repo
         run: |
