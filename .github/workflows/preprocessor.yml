@@ -72,7 +72,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: gh_output
-          path: ${{ github.workspace }}/${{ env.TARGET_REPO }}/site/docs/${{ env.FILE_NAME }}
+          path: ${{ github.workspace }}/site/docs
 
       - name: Push new file to pages repo
         run: |
