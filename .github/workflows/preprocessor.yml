@@ -72,12 +72,13 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: gh_output
-          path: philnewm.github.io/site/tmp
+          path: philnewm.github.io/tmp
 
       - name: Move Artifact to Target Directory
         run: |
           mkdir -p philnewm.github.io/site/docs
-          mv philnewm.github.io/site/tmp/* ${{ github.workspace }}/${{ env.TARGET_REPO }}/site/docs
+          mv philnewm.github.io/tmp/* ${{ github.workspace }}/${{ env.TARGET_REPO }}/site/docs/
+          rm -Rf ${{ github.workspace }}/${{ env.TARGET_REPO }}/tmp
 
       - name: Verify Artifact Location
         run: |
