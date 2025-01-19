@@ -17,8 +17,8 @@ env:
   FILE_NAME: "ansible_molecule_using_vagrant_and_virtualbox.md"
   FILE_PATH: "ansible/molecule_getting_started/ansible_molecule_using_vagrant_and_virtualbox.md"
   URL: "raw.githubusercontent.com/philnewm/blog-articles/${{ github.ref_name }}"
-  OUTPUT_CODE: "output_code/ansible_molecule_using_vagrant_and_virtualbox.md.md"
-  OUTPUT_ADMONITIONS: "output_admonitions/ansible_molecule_using_vagrant_and_virtualbox.md.md"
+  OUTPUT_CODE: "output_code/ansible_molecule_using_vagrant_and_virtualbox.md"
+  OUTPUT_ADMONITIONS: "output_admonitions/ansible_molecule_using_vagrant_and_virtualbox.md"
   TARGET_REPO: "philnewm.github.io"
 
 jobs:
