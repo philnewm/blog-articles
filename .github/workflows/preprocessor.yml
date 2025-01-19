@@ -1,6 +1,6 @@
 ---
 
-name: Blog-Preprocessor
+name: blog-preprocessor
 
 on:
   workflow_run:
@@ -34,13 +34,6 @@ jobs:
           output_file_code: ${{ github.workspace }}/${{ env.OUTPUT_CODE }}
           admonitions: true
           output_file_admonitions: ${{ github.workspace }}/${{ env.OUTPUT_ADMONITIONS }}
-
-      - name: Upload gh_output
-        uses: actions/upload-artifact@v4
-        with:
-          name: gh_output
-          path: ${{ github.workspace }}/${{ env.OUTPUT_CODE }}
-          if-no-files-found: error
 
       - name: Upload gh_output
         uses: actions/upload-artifact@v4
