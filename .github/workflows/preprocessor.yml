@@ -77,7 +77,7 @@ jobs:
       - name: Move Artifact to Target Directory
         run: |
           mkdir -p philnewm.github.io/site/docs
-          mv philnewm.github.io/tmp/* ${{ github.workspace }}/${{ env.TARGET_REPO }}/site/docs/
+          cp philnewm.github.io/tmp/${{ env.FILE_NAME }} ${{ github.workspace }}/${{ env.TARGET_REPO }}/site/docs/${{ env.FILE_NAME }}
           rm -Rf ${{ github.workspace }}/${{ env.TARGET_REPO }}/tmp
 
       - name: Verify Artifact Location
