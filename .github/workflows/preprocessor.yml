@@ -96,13 +96,13 @@ jobs:
       - name: Move Artifact to Target Directory
         run: |
           mkdir -p site/docs
-          cp tmp/${{ env.FILE_NAME }} ${{ github.workspace }}/$${{ github.workspace }}/site/docs/
-          rm -Rf ${{ github.workspace }}/tmp
+          cp tmp/${{ env.FILE_NAME }} /${{ github.workspace }}/site/docs/
+          rm -Rf /${{ github.workspace }}/tmp
 
       - name: Verify Artifact Location
         run: |
           echo "Files in site/docs:"
-          ls -l ${{ github.workspace }}/site/docs
+          ls -l /${{ github.workspace }}/site/docs
 
       - name: Push new file to pages repo
         run: |
