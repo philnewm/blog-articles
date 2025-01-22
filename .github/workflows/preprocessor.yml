@@ -3,6 +3,11 @@
 name: blog-preprocessor
 
 on:
+  # TODO remove this trigger after debugging
+  push:
+    branches:
+      - publish
+
   workflow_run:
       workflows:
       - getting-started-ci
