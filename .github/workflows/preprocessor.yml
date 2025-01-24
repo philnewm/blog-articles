@@ -60,32 +60,12 @@ jobs:
     runs-on: ubuntu-latest
     # TODO implement a query to identify text files needing to be updated
     steps:
-      - name: Show variable names
-        run: |
-          echo "FILE_NAME: ${{ env.FILE_NAME }}"
-          echo "TARGET_REPO: ${{ env.TARGET_REPO }}"
-          echo "GITHUB_WORKSPACE: ${{ github.workspace }}"
-          echo "GITHUB_REPOSITORY: ${{ github.repository }}"
-
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           repository: philnewm/philnewm.github.io
           token: ${{ secrets.PAGES_PAT }}
           fetch-depth: 1
-
-      - name: Show variable names
-        run: |
-          echo "FILE_NAME: ${{ env.FILE_NAME }}"
-          echo "TARGET_REPO: ${{ env.TARGET_REPO }}"
-          echo "GITHUB_WORKSPACE: ${{ github.workspace }}"
-          echo "GITHUB_REPOSITORY: ${{ github.repository }}"
-
-      - name: Show current location
-        run: |
-          echo "Current working directory: $(pwd)"
-          echo "Files:"
-          ls -R
 
       - name: Get artifacts
         uses: actions/download-artifact@v4
