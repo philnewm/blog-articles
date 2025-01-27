@@ -92,4 +92,26 @@ jobs:
           git commit -m "[Automated] Add text file '${{ env.FILE_NAME }}' repository"
           git push
 
+  push-to-devto:
+    needs: convert-markdown
+    # if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'publish' }}
+    runs-on: ubuntu-latest
+    # TODO implement a query to identify text files needing to be updated
+    steps:
+      - name: Get artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: devto_output
+          path: tmp
+
+      - name: Upload to Dev.to
+        uses: philnewm/blog-upload@main
+        with:
+          markdown_file_path: tmp/${{ env.FILE_NAME }}
+          service: "devto"
+          key: ${{ secrets.DEVTO_KEY }}
+          canonical_url: 
+          description: "This article is about using Vagrant and VirtualBox with Molecule to test Ansible roles."
+          publish: False
+
 ...
