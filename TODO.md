@@ -10,3 +10,12 @@
 
 * Add state display per branch
 * Automate table creation
+
+## Approach
+
+* Control blog page structure from blog-articles repo - good idea?
+* Based on repo root excluding hidden directories, README, TODO
+* Collect markdown files recursively
+* List of markdown filepaths mapped to ci workflows
+
+
