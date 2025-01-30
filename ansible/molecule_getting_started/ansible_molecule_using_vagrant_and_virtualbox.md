@@ -310,7 +310,9 @@ Now you should be able to run `molecule verify` to have these tests run against 
 
 ## Vagrant
 
-Explain what gets saved where and how does the ephemeral directory work
+Explain what gets saved where and how does the ephemermal directory work
+
+@@TODO Location of ephermal directory might have changed according to [release notes](https://github.com/ansible/molecule/releases/tag/v25.2.0)
 
 ## Wrap-Up
 

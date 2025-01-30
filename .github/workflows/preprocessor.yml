@@ -37,12 +37,24 @@ jobs:
           fetch-depth: 1
 
       - name: Get markdown files
+        # TODO move ignore files to repo variable
         run: |
-          find . -type f -name "*.md" ! -path "*/.*/*" ! -name "README.md" ! -name "TODO.md" > md_files.txt
+          IGNORED_FILES="README.md TODO.md some_dir/ignore_this.md"
 
-          files=$(cat md_files.txt | jq -R -s -c 'split("\n")[:-1]')
+          files=$(git diff --name-only HEAD^ HEAD)
+
+          # Filter out ignored files
+          filtered_files=""
+          for file in $files; do
+            if ! echo "$IGNORED_FILES" | grep -q -w "$file"; then
+              filtered_files+="$file"$'\n'
+            fi
+          done
+
+          files_json=$(echo "$filtered_files" | jq -R -s -c 'split("\n")[:-1]')
           echo -e "Markdown files found:\n\n$(echo "$files" | jq -r '.[]')"
-          echo "files::$files" >> $GITHUB_OUTPUT
+
+          echo "files=$files" >> $GITHUB_OUTPUT
 
   convert-markdown:
     needs: collect-markdown-files
