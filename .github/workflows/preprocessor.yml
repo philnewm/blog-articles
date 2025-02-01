@@ -4,6 +4,7 @@ name: blog-preprocessor
 
 on:
   # TODO remove this trigger after debugging
+  workflow_dispatch:
   push:
     branches:
       - publish
@@ -19,16 +20,15 @@ permissions:
 
 env:
   PYTHON_VERSION: "3.12"
-  FILE_NAME: "ansible_molecule_using_vagrant_and_virtualbox.md"
-  FILE_PATH: "ansible/molecule_getting_started/ansible_molecule_using_vagrant_and_virtualbox.md"
-  URL: "raw.githubusercontent.com/philnewm/blog-articles/${{ github.ref_name }}"
-  OUTPUT_CODE: "output_code/ansible_molecule_using_vagrant_and_virtualbox.md"
-  OUTPUT_ADMONITIONS: "output_admonitions/ansible_molecule_using_vagrant_and_virtualbox.md"
+  URL: "raw.githubusercontent.com/${{ github.repository }}/${{ github.ref_name }}"
   TARGET_REPO: "philnewm.github.io"
 
 jobs:
   collect-markdown-files:
     runs-on: ubuntu-latest
+    outputs:
+      files: ${{ steps.get-markdown-files.outputs.files }}
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -37,24 +37,31 @@ jobs:
           fetch-depth: 1
 
       - name: Get markdown files
-        # TODO move ignore files to repo variable
+        id: get-markdown-files
+        env:
+          IGNORED_FILES: ${{ vars.IGNORED_FILES }}
         run: |
-          IGNORED_FILES="README.md TODO.md some_dir/ignore_this.md"
-
-          files=$(git diff --name-only HEAD^ HEAD)
+          IFS=',' read -r -a ignore_array <<< "${{ env.IGNORED_FILES }}"
+          mapfile -t files < <(git diff --name-only HEAD^ HEAD -- '*.md')
 
           # Filter out ignored files
-          filtered_files=""
-          for file in $files; do
-            if ! echo "$IGNORED_FILES" | grep -q -w "$file"; then
-              filtered_files+="$file"$'\n'
-            fi
+          filtered_files=()
+          for file in "${files[@]}"; do
+              for ignored in "${ignore_array[@]}"; do
+                  [[ "$file" == "$ignored" ]] && continue 2
+              done
+
+              filtered_files+=("$file")
           done
 
-          files_json=$(echo "$filtered_files" | jq -R -s -c 'split("\n")[:-1]')
-          echo -e "Markdown files found:\n\n$(echo "$files" | jq -r '.[]')"
+          files_json=$(printf '%s\n' "${filtered_files[@]}" | jq -R -s -c 'split("\n")[:-1]')
+          echo -e "Markdown files found:\n\n$(printf '%s\n' "${filtered_files[@]}")"
 
-          echo "files=$files" >> $GITHUB_OUTPUT
+          echo "files=$files_json" >> $GITHUB_OUTPUT
+
+      - name: Show found files
+        run: |
+          echo "Markdown files from workflow: ${{ steps.get-markdown-files.outputs.files }}"
 
   convert-markdown:
     needs: collect-markdown-files
@@ -72,33 +79,38 @@ jobs:
 
       - name: Convert code and admonitions
         uses: philnewm/markdown-conversion@main
+        env:
+          FILE_NAME: ${{ steps.extract_filename.outputs.filename }}
         with:
           domain_url: ${{ env.URL }}
           markdown_file_path: ${{ matrix.file }}
           code: true
-          output_file_code: ${{ github.workspace }}/${{ steps.extract_filename.outputs.filename }}
+          output_file_code: ${{ github.workspace }}/code/${{ env.FILE_NAME }}
           admonitions: true
-          output_file_admonitions: ${{ github.workspace }}/${{ steps.extract_filename.outputs.filename }}
+          output_file_admonitions: ${{ github.workspace }}/admonition/${{ env.FILE_NAME }}
 
       - name: Upload gh_output
+        env:
+          FILE_NAME: ${{ steps.extract_filename.outputs.filename }}
         uses: actions/upload-artifact@v4
         with:
           name: gh_output
-          path: ${{ github.workspace }}/${{ env.OUTPUT_CODE }}
+          path: ${{ github.workspace }}/code/${{ env.FILE_NAME }}
           if-no-files-found: error
 
       - name: Upload devto_output
+        env:
+          FILE_NAME: ${{ steps.extract_filename.outputs.filename }}
         uses: actions/upload-artifact@v4
         with:
           name: devto_output
-          path: ${{ github.workspace }}/${{ env.OUTPUT_ADMONITIONS }}
+          path: ${{ github.workspace }}/admonition/${{ env.FILE_NAME }}
           if-no-files-found: error
 
   push-to-pages-repo:
     needs: convert-markdown
-    # if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'publish' }}
+    if: false  # ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'publish' }}
     runs-on: ubuntu-latest
-    # TODO implement a query to identify text files needing to be updated
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -134,9 +146,8 @@ jobs:
 
   push-to-devto:
     needs: convert-markdown
-    # if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'publish' }}
+    if: false  # ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'publish' }}
     runs-on: ubuntu-latest
-    # TODO implement a query to identify text files needing to be updated
     steps:
       - name: Get artifacts
         uses: actions/download-artifact@v4
