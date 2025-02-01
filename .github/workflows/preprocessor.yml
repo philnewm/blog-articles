@@ -66,7 +66,7 @@ jobs:
           if [ ${#files_add[@]} -gt 0 ]; then
               files_added_json=$(filter_files "${files_add[@]}")
 
-              echo -e "::notice::Markdown files added:\n\n$($files_added_json | jq -r '.[]')"
+              echo -e "::notice::Markdown files added:\n\n$($files_added_json | jq)"
               echo "files_added=$files_added_json" >> $GITHUB_OUTPUT
           else
               echo "files_added=" >> $GITHUB_OUTPUT
@@ -77,7 +77,7 @@ jobs:
           if [ ${#files_del[@]} -gt 0 ]; then
               files_removed_json=$(filter_files "${files_del[@]}")
 
-              echo -e "::notice::Markdown files removed:\n\n$($files_added_json | jq -r '.[]')"
+              echo -e "::notice::Markdown files removed:\n\n$($files_added_json | jq)"
               echo "files_removed=$files_removed_json" >> $GITHUB_OUTPUT
           else
               echo "files_removed=" >> $GITHUB_OUTPUT
