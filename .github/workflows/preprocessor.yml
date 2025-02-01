@@ -67,7 +67,7 @@ jobs:
 
   convert-markdown:
     needs: collect-markdown-files
-    if: ${{ toJson(needs.collect-markdown-files.outputs.files) != '[""]' }}
+    if: ${{ needs.collect-markdown-files.outputs.files != '[""]' }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
