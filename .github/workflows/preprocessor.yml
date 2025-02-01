@@ -69,7 +69,7 @@ jobs:
               echo -e "::notice::Markdown files added:\n\n$($files_added_json | jq -r '.[]')"
               echo "files_added=$files_added_json" >> $GITHUB_OUTPUT
           else
-              echo "files_added=''" >> $GITHUB_OUTPUT
+              echo "files_added=" >> $GITHUB_OUTPUT
               echo "::notice::No added files found."
           fi
 
@@ -80,7 +80,7 @@ jobs:
               echo -e "::notice::Markdown files removed:\n\n$($files_added_json | jq -r '.[]')"
               echo "files_removed=$files_removed_json" >> $GITHUB_OUTPUT
           else
-              echo "files_removed=''" >> $GITHUB_OUTPUT
+              echo "files_removed=" >> $GITHUB_OUTPUT
               echo "::notice::No removed files found."
 
           fi
