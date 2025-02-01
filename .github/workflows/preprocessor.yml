@@ -89,15 +89,11 @@ jobs:
         if: ${{ steps.get-markdown-files.outputs.files_added }}
         run: |
           echo "Markdown files from workflow: ${{ toJson(steps.get-markdown-files.outputs.files_added) }}"
-          echo "Markdown files from workflow: ${{ fromJson(steps.get-markdown-files.outputs.files_added) }}"
-          echo "Markdown files from workflow: ${{ steps.get-markdown-files.outputs.files_added }}"
 
       - name: Show removed files if any
         if: ${{ steps.get-markdown-files.outputs.files_removed }}
         run: |
           echo "Markdown files from workflow: ${{ toJson(steps.get-markdown-files.outputs.files_removed) }}"
-          echo "Markdown files from workflow: ${{ fromJson(steps.get-markdown-files.outputs.files_removed) }}"
-          echo "Markdown files from workflow: ${{ steps.get-markdown-files.outputs.files_removed }}"
 
   convert-markdown:
     needs: collect-markdown-files
@@ -105,7 +101,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        file: ${{ fromJson(needs.collect-markdown-files.outputs.files) }}
+        file: ${{ fromJson(needs.collect-markdown-files.outputs.files_added) }}
 
     steps:
       - name: Extract file name
