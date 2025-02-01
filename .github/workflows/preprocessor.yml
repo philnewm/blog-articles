@@ -61,7 +61,7 @@ jobs:
 
       - name: Show found files
         run: |
-          echo "Markdown files from workflow: ${{ steps.get-markdown-files.outputs.files }}"
+          echo "Markdown files from workflow: ${{ fromJson(steps.get-markdown-files.outputs.files) }}"
 
   convert-markdown:
     needs: collect-markdown-files
