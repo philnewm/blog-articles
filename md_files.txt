@@ -1,3 +1,0 @@
-./ansible/molecule_getting_started/ansible_molecule_using_vagrant_and_virtualbox.md
-./ansible/ansible_basics.md
-./ansible/desktop_testing_setup/desktop_testing.md
