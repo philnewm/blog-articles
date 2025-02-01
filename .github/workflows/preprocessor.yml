@@ -67,6 +67,7 @@ jobs:
 
   convert-markdown:
     needs: collect-markdown-files
+    # TODO research if there's some way to check if the output is empty
     if: ${{ needs.collect-markdown-files.outputs.files != '[""]' }}
     runs-on: ubuntu-latest
     strategy:
