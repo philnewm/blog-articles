@@ -42,22 +42,43 @@ jobs:
           IGNORED_FILES: ${{ vars.IGNORED_FILES }}
         run: |
           IFS=',' read -r -a ignore_array <<< "${{ env.IGNORED_FILES }}"
-          mapfile -t files < <(git diff --name-only HEAD^ HEAD -- '*.md')
+          mapfile -t files_new < <(git diff --name-only --diff-filter=A HEAD^ HEAD -- '*.md')
+          mapfile -t files_del < <(git diff --name-only --diff-filter=D HEAD^ HEAD -- '*.md')
 
-          # Filter out ignored files
-          filtered_files=()
-          for file in "${files[@]}"; do
-              for ignored in "${ignore_array[@]}"; do
-                  [[ "$file" == "$ignored" ]] && continue 2
+          filter_files() {
+              local file_list=("$1")
+              local filtered_files=()
+              
+              for file in "${file_list[@]}"; do
+                  for ignored in "${ignore_array[@]}"; do
+                      [[ "$file" == "$ignored" ]] && continue 2
+                  done
+                  filtered_files+=("$file")
               done
 
-              filtered_files+=("$file")
-          done
+              # Convert filtered list to JSON format
+              files_json=$(printf '%s\n' "${filtered_files[@]}" | jq -R -s -c 'split("\n")[:-1]')
+              echo "$files_json"
+          }
 
-          files_json=$(printf '%s\n' "${filtered_files[@]}" | jq -R -s -c 'split("\n")[:-1]')
-          echo -e "Markdown files found:\n\n$(printf '%s\n' "${filtered_files[@]}")"
+          if [ ${#files_added[@]} -gt 0 ]; then
+              files_added_json=$(filter_files "${files_added[@]}")
 
-          echo "files=${files_json}" >> $GITHUB_OUTPUT
+              echo -e "::notice::Markdown files added:\n\n$($files_added_json | jq -r '.[]')"
+              echo "files_added=$files_added_json" >> $GITHUB_OUTPUT
+          else
+              echo "::notice::No added files found."
+          fi
+
+          # Check and filter removed files
+          if [ ${#files_removed[@]} -gt 0 ]; then
+              files_removed_json=$(filter_files "${files_removed[@]}")
+
+              echo -e "::notice::Markdown files removed:\n\n$($files_added_json | jq -r '.[]')"
+              echo "files_removed=$files_removed_json" >> $GITHUB_OUTPUT
+          else
+              echo "::notice::No removed files found."
+          fi
 
       - name: Show found files
         run: |
