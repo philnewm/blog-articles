@@ -31,6 +31,7 @@ jobs:
       files_removed: ${{ steps.get-markdown-files.outputs.files_removed }}
 
     steps:
+      # TODO cleanup this query mess
       - name: Get markdown files from ${{ github.repository}}
         id: get-source-md-files
         # TODO change to publish branch when implemented
@@ -60,6 +61,23 @@ jobs:
         run: |
           echo "source_files=$(echo '${{ steps.get-source-md-files.outputs.source_files }}' | jq -r)"
           echo "target_files=$(echo '${{ steps.get-target-md-files.outputs.target_files }}' | jq -r)"
+
+      - name: Compare files
+        id: compare-files
+        run: |
+          source_files=$(echo '${{ steps.get-source-md-files.outputs.source_files }}' | jq -r)
+          target_files=$(echo '${{ steps.get-target-md-files.outputs.target_files }}' | jq -r)
+
+          files_added=$(echo $source_files $target_files | jq -s '.[0] - .[1]')
+          files_removed=$(echo $source_files $target_files | jq -s '.[1] - .[0]')
+
+          echo "files_added=$files_added" >> $GITHUB_OUTPUT
+          echo "files_removed=$files_removed" >> $GITHUB_OUTPUT
+
+      - name: Debug output
+        run: |
+          echo "added_files=$(echo '${{ steps.compare-files.outputs.files_added }}' | jq -r)"
+          echo "removed_files=$(echo '${{ steps.get-target-md-files.outputs.files_removed }}' | jq -r)"
 
       # TODO reiterate if moving this logic into an action/reusable-workflow makes sense
       # - name: Get markdown files
