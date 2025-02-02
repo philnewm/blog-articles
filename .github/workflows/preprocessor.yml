@@ -89,12 +89,12 @@ jobs:
       - name: Show added files if any
         if: ${{ steps.get-markdown-files.outputs.files_added }}
         run: |
-          echo "Markdown files from workflow: ${{ toJson(steps.get-markdown-files.outputs.files_added) }}"
+          echo "Markdown files to add: ${{ toJson(steps.get-markdown-files.outputs.files_added) }}"
 
       - name: Show removed files if any
         if: ${{ steps.get-markdown-files.outputs.files_removed }}
         run: |
-          echo "Markdown files from workflow: ${{ toJson(steps.get-markdown-files.outputs.files_removed) }}"
+          echo "Markdown files to remove: ${{ toJson(steps.get-markdown-files.outputs.files_removed) }}"
 
   convert-markdown:
     needs: collect-markdown-files
@@ -145,7 +145,7 @@ jobs:
     needs:
       - collect-markdown-files
       - convert-markdown
-    if: ${{ (needs.collect-markdown-files.outputs.files_added || needs.collect-markdown-files.outputs.files_removed) }}
+    if: ${{ always() && (needs.convert-markdown.result == 'success' || needs.convert-markdown.result == 'skipped') && (needs.collect-markdown-files.outputs.files_added || needs.collect-markdown-files.outputs.files_removed) }}
     # TODO put back in line after development
     # && github.event.workflow_run.head_branch == 'publish' }}
     runs-on: ubuntu-latest
