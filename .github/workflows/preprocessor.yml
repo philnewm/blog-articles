@@ -37,6 +37,7 @@ jobs:
           repository: philnewm/blog-articles
           fetch-depth: 2
 
+      # TODO reiterate if moving this logic into an action/reusable-workflow makes sense
       - name: Get markdown files
         id: get-markdown-files
         env:
@@ -141,9 +142,14 @@ jobs:
           if-no-files-found: error
 
   push-to-pages-repo:
-    needs: convert-markdown
-    if: false  # ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'publish' }}
+    needs:
+      - collect-markdown-files
+      - convert-markdown
+    if: ${{ (needs.collect-markdown-files.outputs.files_added || needs.collect-markdown-files.outputs.files_removed) }}
+    # TODO put back in line after development
+    # && github.event.workflow_run.head_branch == 'publish' }}
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -153,16 +159,35 @@ jobs:
           fetch-depth: 1
 
       - name: Get artifacts
+        if: ${{ needs.collect-markdown-files.outputs.files_added }}
         uses: actions/download-artifact@v4
         with:
           name: gh_output
           path: tmp
 
-      - name: Move Artifact to Target Directory
+      - name: Move artifact to target directory
+        if: ${{ needs.collect-markdown-files.outputs.files_added }}
+        env:
+          FILE_PATHS_ADD: ${{ needs.collect-markdown-files.outputs.files_added }}
         run: |
           mkdir -p site/docs
-          cp tmp/${{ env.FILE_NAME }} /${{ github.workspace }}/site/docs/
-          rm -Rf /${{ github.workspace }}/tmp
+          echo "Updating files: $('${{ env.FILE_PATHS_ADD }}'' | jq -r '.[]'))"
+
+          for file in $(echo "${FILE_PATHS_ADD}" | jq -r '.[]'); do
+            mkdir -p "$(dirname $file)"
+            cp tmp/$file /${{ github.workspace }}/site/docs/$(dirname $file)
+            rm -Rf /${{ github.workspace }}/tmp
+          done
+
+      - name: Remove obsolete files
+        if: ${{ needs.collect-markdown-files.outputs.files_removed }}
+        env:
+          FILE_PATHS_DEL: ${{ needs.collect-markdown-files.outputs.files_removed }}
+        run: |
+          echo "Removing files: $('${{ env.FILE_PATHS_DEL }}'' | jq -r '.[]'))"
+          for file in $(echo "${FILE_PATHS_DEL}" | jq -r '.[]'); do
+            rm -f "$file"
+          done
 
       - name: Verify Artifact Location
         run: |
@@ -174,7 +199,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add .
-          git commit -m "[Automated] Add text file '${{ env.FILE_NAME }}' repository"
+          git commit -m "[Automated] Update content"
           git push
 
   push-to-devto:
