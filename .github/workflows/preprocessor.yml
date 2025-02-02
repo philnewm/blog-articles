@@ -22,6 +22,7 @@ env:
   PYTHON_VERSION: "3.12"
   URL: "raw.githubusercontent.com/${{ github.repository }}/${{ github.ref_name }}"
   TARGET_REPO: "philnewm.github.io"
+  TARGET_PREFIX: "site/docs/"
 
 jobs:
   collect-markdown-files:
@@ -51,6 +52,7 @@ jobs:
           IGNORED_FILES_JSON=$(jq -R -c 'split(",")' <<< "${{ vars.IGNORED_FILES_TARGET }}")
           md_files_json=$(gh api repos/philnewm/philnewm.github.io/git/trees/main?recursive=1 --jq '[.tree[].path | select(endswith(".md"))]')
           md_files_json=$(echo $md_files_json | jq --argjson ignored "$IGNORED_FILES_JSON" 'map(select(. as $file | $ignored | index($file) | not))')
+          md_files_json=$(echo $md_files_json | jq 'map(sub("^${{ env.TARGET_PREFIX }}"; ""))')
           md_files_str=$(echo $md_files_json | jq -c)
 
           echo "target_files=$md_files_str" >> $GITHUB_OUTPUT
