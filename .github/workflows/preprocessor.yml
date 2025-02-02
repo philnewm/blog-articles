@@ -33,9 +33,10 @@ jobs:
     steps:
       - name: Get markdown files from ${{ github.repository}}
         id: get-source-md-files
+        # TODO change to publish branch when implemented
         run: |
           IGNORED_FILES_JSON=$(jq -R -c 'split(",")' <<< "${{ vars.IGNORED_FILES }}")
-          md_files_json=$(gh api repos/philnewm/blog-articles/git/trees/publish?recursive=1 --jq '[.tree[].path | select(endswith(".md"))]')
+          md_files_json=$(gh api repos/philnewm/blog-articles/git/trees/pages-debug?recursive=1 --jq '[.tree[].path | select(endswith(".md"))]')
           md_files_json=$(echo $md_files_json | jq --argjson ignored "$IGNORED_FILES_JSON" 'map(select(. as $file | $ignored | index($file) | not))')
           md_files_str=$(echo $md_files_json | jq -c)
 
