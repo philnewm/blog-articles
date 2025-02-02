@@ -49,7 +49,7 @@ jobs:
           IGNORED_FILES_JSON=$(jq -R -c 'split(",")' <<< "${{ vars.IGNORED_FILES_TARGET }}")
           md_files_json=$(gh api repos/philnewm/philnewm.github.io/git/trees/main?recursive=1 --jq '[.tree[].path | select(endswith(".md"))]')
           md_files_json=$(echo $md_files_json | jq --argjson ignored "$IGNORED_FILES_JSON" 'map(select(. as $file | $ignored | index($file) | not))')
-          md_files_str=$(echo $md_files_json | jq -r '. | join(",")')
+          md_files_str=$(echo $md_files_json | jq -c)
 
           echo "target_files=$md_files_str" >> $GITHUB_OUTPUT
         env:
@@ -57,8 +57,8 @@ jobs:
 
       - name: Debug output
         run: |
-          echo "source_files=$(cat ${{ steps.get-source-md-files.outputs.source_files }} | jq -r '.source_files')"
-          echo "target_files=$(cat ${{ steps.get-target-md-files.outputs.target_files }} | jq -r '.target_files')"
+          echo "source_files=$(echo '${{ steps.get-source-md-files.outputs.source_files }}' | jq -r)"
+          echo "target_files=$(echo '${{ steps.get-target-md-files.outputs.target_files }}' | jq -r)"
 
       # TODO reiterate if moving this logic into an action/reusable-workflow makes sense
       # - name: Get markdown files
