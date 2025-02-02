@@ -34,7 +34,8 @@ jobs:
       - name: Get markdown files from ${{ github.repository}}
         run: |
           IGNORED_FILES_JSON=$(jq -R -c 'split(",")' <<< "${{ vars.IGNORED_FILES }}")
-          md_files_json=$(gh api repos/${{ github.repository }}/git/trees/publish?recursive=1 --jq '[.tree[].path | select(endswith(".md"))] - $IGNORED_FILES_JSON')
+          md_files_json=$(gh api repos/philnewm/blog-articles/git/trees/publish?recursive=1 --jq '[.tree[].path | select(endswith(".md"))]')
+          md_files_json=$(echo $md_files_json | jq --argjson ignored "$IGNORED_FILES_JSON" 'map(select(. as $file | $ignored | index($file) | not))')
 
           echo "source_files=$md_files_json" >> $GITHUB_OUTPUT
         env:
