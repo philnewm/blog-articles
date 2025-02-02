@@ -171,7 +171,7 @@ jobs:
           FILE_PATHS_ADD: ${{ needs.collect-markdown-files.outputs.files_added }}
         run: |
           mkdir -p site/docs
-          echo "Updating files: $('${{ env.FILE_PATHS_ADD }}'' | jq -r '.[]'))"
+          echo "Updating files: $('${{ env.FILE_PATHS_ADD }}' | jq -r '.[]'))"
 
           for file in $(echo "${FILE_PATHS_ADD}" | jq -r '.[]'); do
             mkdir -p "$(dirname $file)"
