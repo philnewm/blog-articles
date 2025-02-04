@@ -28,8 +28,8 @@ jobs:
   collect-markdown-files:
     runs-on: ubuntu-latest
     outputs:
-      files_added: ${{ steps.get-markdown-files.outputs.files_added }}
-      files_removed: ${{ steps.get-markdown-files.outputs.files_removed }}
+      files_added: ${{ steps.compare-files.outputs.files_added }}
+      files_removed: ${{ steps.compare-files.outputs.files_removed }}
 
     steps:
       # TODO cleanup this query mess
@@ -81,68 +81,19 @@ jobs:
           echo "added_files=$(echo '${{ steps.compare-files.outputs.files_added }}' | jq -r)"
           echo "removed_files=$(echo '${{ steps.get-target-md-files.outputs.files_removed }}' | jq -r)"
 
-      # TODO reiterate if moving this logic into an action/reusable-workflow makes sense
-      # - name: Get markdown files
-      #   id: get-markdown-files
-      #   env:
-      #     IGNORED_FILES: ${{ vars.IGNORED_FILES }}
-      #   run: |
-      #     IFS=',' read -r -a ignore_array <<< "${{ env.IGNORED_FILES }}"
-      #     mapfile -t files_add < <(git diff --name-only --diff-filter=A HEAD^ HEAD -- '*.md')
-      #     mapfile -t files_del < <(git diff --name-only --diff-filter=D HEAD^ HEAD -- '*.md')
+      - name: Show added files if any
+        if: ${{ steps.compare-files.outputs.files_added }}
+        run: |
+          echo "Markdown files to add: ${{ toJson(steps.compare-files.outputs.files_added) }}"
 
-      #     filter_files() {
-      #         local file_list=("$1")
-      #         local filtered_files=()
-              
-      #         for file in "${file_list[@]}"; do
-      #             for ignored in "${ignore_array[@]}"; do
-      #                 [[ "$file" == "$ignored" ]] && continue 2
-      #             done
-      #             filtered_files+=("$file")
-      #         done
-
-      #         # Convert filtered list to JSON format
-      #         files_json=$(printf '%s\n' "${filtered_files[@]}" | jq -R -s -c 'split("\n")[:-1]')
-      #         echo "$files_json"
-      #     }
-
-      #     # Check and filter added files
-      #     if [ ${#files_add[@]} -gt 0 ]; then
-      #         files_added_json=$(filter_files "${files_add[@]}")
-
-      #         echo -e "::notice::Markdown files added:$files_added_json"
-      #         echo "files_added=$files_added_json" >> $GITHUB_OUTPUT
-      #     else
-      #         echo "files_added=" >> $GITHUB_OUTPUT
-      #         echo "::notice::No added files found."
-      #     fi
-
-      #     # Check and filter removed files
-      #     if [ ${#files_del[@]} -gt 0 ]; then
-      #         files_removed_json=$(filter_files "${files_del[@]}")
-
-      #         echo -e "::notice::Markdown files removed:$files_removed_json"
-      #         echo "files_removed=$files_removed_json" >> $GITHUB_OUTPUT
-      #     else
-      #         echo "files_removed=" >> $GITHUB_OUTPUT
-      #         echo "::notice::No removed files found."
-
-      #     fi
-
-      # - name: Show added files if any
-      #   if: ${{ steps.get-markdown-files.outputs.files_added }}
-      #   run: |
-      #     echo "Markdown files to add: ${{ toJson(steps.get-markdown-files.outputs.files_added) }}"
-
-      # - name: Show removed files if any
-      #   if: ${{ steps.get-markdown-files.outputs.files_removed }}
-      #   run: |
-      #     echo "Markdown files to remove: ${{ toJson(steps.get-markdown-files.outputs.files_removed) }}"
+      - name: Show removed files if any
+        if: ${{ steps.compare-files.outputs.files_removed }}
+        run: |
+          echo "Markdown files to remove: ${{ toJson(steps.compare-files.outputs.files_removed) }}"
 
   convert-markdown:
     needs: collect-markdown-files
-    if: false  # ${{ needs.collect-markdown-files.outputs.files_added }}
+    if: ${{ needs.collect-markdown-files.outputs.files_added }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -189,7 +140,7 @@ jobs:
     needs:
       - collect-markdown-files
       - convert-markdown
-    if: false  # ${{ always() && (needs.convert-markdown.result == 'success' || needs.convert-markdown.result == 'skipped') && (needs.collect-markdown-files.outputs.files_added || needs.collect-markdown-files.outputs.files_removed) }}
+    if: false  ${{ always() && (needs.collect-markdown-files.outputs.files_added || needs.collect-markdown-files.outputs.files_removed) }}
     # TODO put back in line after development
     # && github.event.workflow_run.head_branch == 'publish' }}
     runs-on: ubuntu-latest
@@ -219,7 +170,7 @@ jobs:
 
           for file in $(echo "${FILE_PATHS_ADD}" | jq -r '.[]'); do
             mkdir -p "$(dirname $file)"
-            cp tmp/$file /${{ github.workspace }}/site/docs/$(dirname $file)
+            cp tmp/$file /${{ github.workspace }}/site/docs/$file
             rm -Rf /${{ github.workspace }}/tmp
           done
 
@@ -230,7 +181,7 @@ jobs:
         run: |
           echo "Removing files: $('${{ env.FILE_PATHS_DEL }}' | jq -r '.[]'))"
           for file in $(echo "${FILE_PATHS_DEL}" | jq -r '.[]'); do
-            rm -f "$file"
+            rm -f "/${{ github.workspace }}/site/docs/$file"
           done
 
       - name: Verify Artifact Location
