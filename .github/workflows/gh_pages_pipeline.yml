@@ -1,6 +1,6 @@
 ---
 
-name: blog-preprocessor
+name: Github Pages Pipeline
 
 on:
   # TODO remove this trigger after debugging
@@ -115,7 +115,7 @@ jobs:
           markdown_file_path: ${{ matrix.file }}
           code: true
           output_file_code: ${{ github.workspace }}/code/${{ env.FILE_NAME }}
-          admonitions: true
+          admonitions: false
           output_file_admonitions: ${{ github.workspace }}/admonition/${{ env.FILE_NAME }}
 
       - name: Upload gh_output
@@ -127,20 +127,33 @@ jobs:
           path: ${{ github.workspace }}/code/${{ env.FILE_NAME }}
           if-no-files-found: error
 
-      - name: Upload devto_output
-        env:
-          FILE_NAME: ${{ steps.extract_filename.outputs.filename }}
+
+  combine-artifacts:
+    runs-on: ubuntu-latest
+    needs: convert-markdown
+    env:
+      DOWNLOAD_DIR: ${{ github.workspace }}/combined_files
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ${{ env.DOWNLOAD_DIR }}
+
+      - name: List downloaded files
+        run: ls -R combined_files${{ env.DOWNLOAD_DIR }}
+
+      - name: Upload combined artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.FILE_NAME }}_admonition_output
-          path: ${{ github.workspace }}/admonition/${{ env.FILE_NAME }}
-          if-no-files-found: error
+          name: gh_pages_files
+          path: ${{ env.DOWNLOAD_DIR }}/*
+
 
   push-to-pages-repo:
     needs:
       - collect-markdown-files
-      - convert-markdown
-    if: false  ${{ always() && (needs.collect-markdown-files.outputs.files_added || needs.collect-markdown-files.outputs.files_removed) }}
+      - combine-artifacts
+    if: ${{ always() && (needs.collect-markdown-files.outputs.files_added || needs.collect-markdown-files.outputs.files_removed) }}
     # TODO put back in line after development
     # && github.event.workflow_run.head_branch == 'publish' }}
     runs-on: ubuntu-latest
@@ -157,7 +170,7 @@ jobs:
         if: ${{ needs.collect-markdown-files.outputs.files_added }}
         uses: actions/download-artifact@v4
         with:
-          name: gh_output
+          name: gh_pages_files
           path: tmp
 
       - name: Move artifact to target directory
@@ -200,26 +213,5 @@ jobs:
           else
             echo "No changes to sync."
           fi
-
-  push-to-devto:
-    needs: convert-markdown
-    if: false  # ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'publish' }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Get artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: devto_output
-          path: tmp
-
-      - name: Upload to Dev.to
-        uses: philnewm/blog-upload@main
-        with:
-          markdown_file_path: tmp/${{ env.FILE_NAME }}
-          service: "devto"
-          key: ${{ secrets.DEVTO_KEY }}
-          canonical_url: 
-          description: "This article is about using Vagrant and VirtualBox with Molecule to test Ansible roles."
-          publish: False
 
 ...

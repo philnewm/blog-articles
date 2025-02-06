@@ -314,6 +314,8 @@ Explain what gets saved where and how does the ephemermal directory work
 
 @@TODO Location of ephermal directory might have changed according to [release notes](https://github.com/ansible/molecule/releases/tag/v25.2.0)
 
+@@TODO add user/super-user prefix to commands
+
 ## Wrap-Up
 
 ___
