@@ -87,6 +87,7 @@ jobs:
         if: ${{ steps.compare-files.outputs.files_added }}
         run: |
           echo "Markdown files to add: ${{ toJson(steps.compare-files.outputs.files_added) }}"
+          echo "CSV: ${{ steps.compare-files.outputs.files_csv }}"
 
       - name: Show removed files if any
         if: ${{ steps.compare-files.outputs.files_removed }}
