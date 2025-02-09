@@ -146,9 +146,9 @@ jobs:
           readarray -t file_array < <(echo '${{ env.FILE_PATHS_ADD }}' | jq -r '.[]')
           echo "Updating files: ${file_array[@]}"
 
-          for file in "${file_array[@]}"; do
-            mkdir -p "$(dirname $file)"
-            cp tmp/$(basename $file) ${{ github.workspace }}/site/docs/$file
+          for file_path in "${file_array[@]}"; do
+            mkdir -p "$(${{ github.workspace }}/site/docs/$file_path)"
+            cp tmp/$(basename $file) ${{ github.workspace }}/site/docs/$file_path
           done
 
           rm -Rf ${{ github.workspace }}/tmp
@@ -161,8 +161,8 @@ jobs:
           readarray -t file_array < <(echo '${{ env.FILE_PATHS_DEL }}' | jq -r '.[]')
           echo "Removing files: ${file_array[@]}"
 
-          for file in "${file_array[@]}"; do
-            rm -f "/${{ github.workspace }}/site/docs/$file"
+          for file_path in "${file_array[@]}"; do
+            rm -f "/${{ github.workspace }}/site/docs/$file_path"
           done
 
       - name: Verify Artifact Location
