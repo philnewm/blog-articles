@@ -85,7 +85,7 @@ jobs:
       - name: Debug output
         run: |
           echo "added_files=$(echo '${{ steps.compare-files.outputs.files_added }}' | jq -r)"
-          echo "removed_files=$(echo '${{ steps.get-target-md-files.outputs.files_removed }}' | jq -r)"
+          echo "removed_files=$(echo '${{ steps.compare-files.outputs.files_removed }}' | jq -r)"
 
       - name: Show added files if any
         if: ${{ steps.compare-files.outputs.files_added }}
@@ -142,9 +142,11 @@ jobs:
           FILE_PATHS_ADD: ${{ needs.collect-markdown-files.outputs.files_added }}
         run: |
           mkdir -p site/docs
-          echo "Updating files: $('${{ env.FILE_PATHS_ADD }}' | jq -r '.[]'))"
 
-          for file in $(echo "${{ env.FILE_PATHS_ADD }}" | jq -r '.[]'); do
+          readarray -t file_array < <(echo "${{ env.FILE_PATHS_ADD }}" | jq -r '.[]')
+          echo "Updating files: $file_array"
+
+          for file in "{$file_array[@]}"; do
             mkdir -p "$(dirname $file)"
             cp tmp/$file /${{ github.workspace }}/site/docs/$file
           done
@@ -156,8 +158,10 @@ jobs:
         env:
           FILE_PATHS_DEL: ${{ needs.collect-markdown-files.outputs.files_removed }}
         run: |
-          echo "Removing files: $('${{ env.FILE_PATHS_DEL }}' | jq -r '.[]'))"
-          for file in $(echo "${{ env.FILE_PATHS_DEL }}" | jq -r '.[]'); do
+          readarray -t file_array < <(echo "${{ env.FILE_PATHS_DEL }}" | jq -r '.[]')
+          echo "Removing files: $file_array"
+
+          for file in "{$file_array[@]}"; do
             rm -f "/${{ github.workspace }}/site/docs/$file"
           done
 
