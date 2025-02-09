@@ -146,7 +146,7 @@ jobs:
           readarray -t file_array < <(echo "${{ env.FILE_PATHS_ADD }}" | jq -r '.[]')
           echo "Updating files: $file_array"
 
-          for file in "{$file_array[@]}"; do
+          for file in "${file_array[@]}"; do
             mkdir -p "$(dirname $file)"
             cp tmp/$file /${{ github.workspace }}/site/docs/$file
           done
@@ -161,7 +161,7 @@ jobs:
           readarray -t file_array < <(echo "${{ env.FILE_PATHS_DEL }}" | jq -r '.[]')
           echo "Removing files: $file_array"
 
-          for file in "{$file_array[@]}"; do
+          for file in "${file_array[@]}"; do
             rm -f "/${{ github.workspace }}/site/docs/$file"
           done
 
