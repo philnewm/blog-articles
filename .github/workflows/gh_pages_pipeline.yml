@@ -174,7 +174,7 @@ jobs:
             git commit -m "[Automated] Update content"
             git push
           else
-            echo "No changes to sync."
+            echo "::warning::No changes to sync."
           fi
 
 ...
