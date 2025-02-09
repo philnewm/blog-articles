@@ -144,14 +144,14 @@ jobs:
           mkdir -p site/docs
 
           readarray -t file_array < <(echo '${{ env.FILE_PATHS_ADD }}' | jq -r '.[]')
-          echo "Updating files: $file_array"
+          echo "Updating files: ${file_array[@]}"
 
           for file in "${file_array[@]}"; do
             mkdir -p "$(dirname $file)"
-            cp tmp/$file /${{ github.workspace }}/site/docs/$file
+            cp tmp/$(basename $file) ${{ github.workspace }}/site/docs/$file
           done
 
-          rm -Rf /${{ github.workspace }}/tmp
+          rm -Rf ${{ github.workspace }}/tmp
 
       - name: Remove obsolete files
         if: ${{ needs.collect-markdown-files.outputs.files_removed }}
@@ -159,7 +159,7 @@ jobs:
           FILE_PATHS_DEL: ${{ needs.collect-markdown-files.outputs.files_removed }}
         run: |
           readarray -t file_array < <(echo '${{ env.FILE_PATHS_DEL }}' | jq -r '.[]')
-          echo "Removing files: $file_array"
+          echo "Removing files: ${file_array[@]}"
 
           for file in "${file_array[@]}"; do
             rm -f "/${{ github.workspace }}/site/docs/$file"
