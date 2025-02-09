@@ -147,8 +147,8 @@ jobs:
           echo "Updating files: ${file_array[@]}"
 
           for file_path in "${file_array[@]}"; do
-            mkdir -p "$(${{ github.workspace }}/site/docs/$file_path)"
-            cp tmp/$(basename $file) ${{ github.workspace }}/site/docs/$file_path
+            mkdir -p "$(dirname ${{ github.workspace }}/site/docs/$file_path)"
+            cp tmp/$(basename $file_path) ${{ github.workspace }}/site/docs/$file_path
           done
 
           rm -Rf ${{ github.workspace }}/tmp
