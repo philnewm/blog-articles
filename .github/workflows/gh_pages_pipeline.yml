@@ -75,8 +75,12 @@ jobs:
 
           echo "files_added=$files_added" >> $GITHUB_OUTPUT
           echo "files_removed=$files_removed" >> $GITHUB_OUTPUT
-          files_csv=$(echo "$files_added" | jq -r '. | join(", ")')
+
+          base_url="https://raw.githubusercontent.com/${{ github.repository }}/refs/heads/${{ github.ref_name }}/"
+          files_csv=$(echo "$files_added" | jq -r --arg base "$base_url" '[.[] | $base + .] | join(",")')
           echo "files_csv=$files_csv" >> $GITHUB_OUTPUT
+
+          # https://raw.githubusercontent.com/philnewm/blog-articles/refs/heads/pages-debug/
 
       - name: Debug output
         run: |
