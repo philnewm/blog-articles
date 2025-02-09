@@ -143,7 +143,7 @@ jobs:
         run: |
           mkdir -p site/docs
 
-          readarray -t file_array < <(echo "${{ env.FILE_PATHS_ADD }}" | jq -r '.[]')
+          readarray -t file_array < <(echo '${{ env.FILE_PATHS_ADD }}' | jq -r '.[]')
           echo "Updating files: $file_array"
 
           for file in "${file_array[@]}"; do
@@ -158,7 +158,7 @@ jobs:
         env:
           FILE_PATHS_DEL: ${{ needs.collect-markdown-files.outputs.files_removed }}
         run: |
-          readarray -t file_array < <(echo "${{ env.FILE_PATHS_DEL }}" | jq -r '.[]')
+          readarray -t file_array < <(echo '${{ env.FILE_PATHS_DEL }}' | jq -r '.[]')
           echo "Removing files: $file_array"
 
           for file in "${file_array[@]}"; do
