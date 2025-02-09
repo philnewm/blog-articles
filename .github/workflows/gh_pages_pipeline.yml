@@ -147,8 +147,9 @@ jobs:
           for file in $(echo "${{ env.FILE_PATHS_ADD }}" | jq -r '.[]'); do
             mkdir -p "$(dirname $file)"
             cp tmp/$file /${{ github.workspace }}/site/docs/$file
-            rm -Rf /${{ github.workspace }}/tmp
           done
+
+          rm -Rf /${{ github.workspace }}/tmp
 
       - name: Remove obsolete files
         if: ${{ needs.collect-markdown-files.outputs.files_removed }}
