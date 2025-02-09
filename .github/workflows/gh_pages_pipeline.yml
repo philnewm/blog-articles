@@ -75,6 +75,8 @@ jobs:
 
           echo "files_added=$files_added" >> $GITHUB_OUTPUT
           echo "files_removed=$files_removed" >> $GITHUB_OUTPUT
+          files_csv=$(echo "$FILES_JSON" | jq -r '. | join(",")')
+          echo "files_csv=$files_csv" >> $GITHUB_OUTPUT
 
       - name: Debug output
         run: |
@@ -91,69 +93,26 @@ jobs:
         run: |
           echo "Markdown files to remove: ${{ toJson(steps.compare-files.outputs.files_removed) }}"
 
-  convert-markdown:
-    needs: collect-markdown-files
-    if: ${{ needs.collect-markdown-files.outputs.files_added }}
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        file: ${{ fromJson(needs.collect-markdown-files.outputs.files_added) }}
-
-    steps:
-      - name: Extract file name
-        id: extract_filename
-        run: |
-          filename=$(basename "${{ matrix.file }}")
-          echo "filename=$filename" >> $GITHUB_OUTPUT
-
       - name: Convert code and admonitions
+        if: ${{ steps.compare-files.outputs.files_added }}
         uses: philnewm/markdown-conversion@main
-        env:
-          FILE_NAME: ${{ steps.extract_filename.outputs.filename }}
         with:
-          domain_url: ${{ env.URL }}
-          markdown_file_path: ${{ matrix.file }}
-          code: true
-          output_file_code: ${{ github.workspace }}/code/${{ env.FILE_NAME }}
-          admonitions: false
-          output_file_admonitions: ${{ github.workspace }}/admonition/${{ env.FILE_NAME }}
+          markdown_file_urls: ${{ steps.compare-files.outputs.files_csv }}
+          output_dir_code: ${{ github.workspace }}/code
+          output_dir_admonitions: ${{ github.workspace }}/admonitions
 
       - name: Upload gh_output
-        env:
-          FILE_NAME: ${{ steps.extract_filename.outputs.filename }}
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.FILE_NAME }}_code_output
-          path: ${{ github.workspace }}/code/${{ env.FILE_NAME }}
+          name: code_output
+          path: ${{ github.workspace }}/code/*
           if-no-files-found: error
-
-
-  combine-artifacts:
-    runs-on: ubuntu-latest
-    needs: convert-markdown
-    env:
-      DOWNLOAD_DIR: ${{ github.workspace }}/combined_files
-    steps:
-      - name: Download all artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: ${{ env.DOWNLOAD_DIR }}
-
-      - name: List downloaded files
-        run: ls -R combined_files${{ env.DOWNLOAD_DIR }}
-
-      - name: Upload combined artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: gh_pages_files
-          path: ${{ env.DOWNLOAD_DIR }}/*
 
 
   push-to-pages-repo:
     needs:
       - collect-markdown-files
-      - combine-artifacts
-    if: ${{ always() && (needs.collect-markdown-files.outputs.files_added || needs.collect-markdown-files.outputs.files_removed) }}
+    if: ${{ needs.collect-markdown-files.outputs.files_added || needs.collect-markdown-files.outputs.files_removed }}
     # TODO put back in line after development
     # && github.event.workflow_run.head_branch == 'publish' }}
     runs-on: ubuntu-latest
@@ -170,7 +129,7 @@ jobs:
         if: ${{ needs.collect-markdown-files.outputs.files_added }}
         uses: actions/download-artifact@v4
         with:
-          name: gh_pages_files
+          name: code_output
           path: tmp
 
       - name: Move artifact to target directory
