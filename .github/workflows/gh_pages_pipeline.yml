@@ -104,7 +104,6 @@ jobs:
         with:
           markdown_file_urls: ${{ steps.compare-files.outputs.files_csv }}
           output_dir_code: ${{ github.workspace }}/code
-          output_dir_admonitions: ${{ github.workspace }}/admonitions
 
       - name: Upload gh_output
         uses: actions/upload-artifact@v4
