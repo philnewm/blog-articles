@@ -86,30 +86,30 @@ jobs:
           echo "titles_removed=$files_removed" >> $GITHUB_OUTPUT
 
           base_url="https://raw.githubusercontent.com/${{ github.repository }}/refs/heads/${{ github.ref_name }}/"
-          files_csv=$(echo "$files_added" | jq -r --arg base "$base_url" '[.[] | $base + .] | join(",")')
-          echo "files_csv=$files_csv" >> $GITHUB_OUTPUT
+          titles_csv=$(echo "$files_added" | jq -r --arg base "$base_url" '[.[] | $base + .] | join(",")')
+          echo "titles_csv=$titles_csv" >> $GITHUB_OUTPUT
 
       - name: Debug output
         run: |
-          echo "added_files=$(echo '${{ steps.compare-files.outputs.files_added }}' | jq -r)"
-          echo "removed_files=$(echo '${{ steps.compare-files.outputs.files_removed }}' | jq -r)"
+          echo "added_titles=$(echo '${{ steps.compare-titles.outputs.titles_added }}' | jq -r)"
+          echo "removed_titles=$(echo '${{ steps.compare-titles.outputs.titles_removed }}' | jq -r)"
 
       - name: Show added files if any
-        if: ${{ steps.compare-files.outputs.files_added }}
+        if: ${{ steps.compare-titles.outputs.titles_added }}
         run: |
-          echo "Markdown files to add: ${{ toJson(steps.compare-files.outputs.files_added) }}"
-          echo "CSV: ${{ steps.compare-files.outputs.files_csv }}"
+          echo "Titles to add: ${{ toJson(steps.compare-titles.outputs.titles_added) }}"
+          echo "CSV: ${{ steps.compare-titles.outputs.titles_csv }}"
 
       - name: Show removed files if any
-        if: ${{ steps.compare-files.outputs.files_removed }}
+        if: ${{ steps.compare-titles.outputs.files_removed }}
         run: |
-          echo "Markdown files to remove: ${{ toJson(steps.compare-files.outputs.files_removed) }}"
+          echo "Markdown files to remove: ${{ toJson(steps.compare-titles.outputs.titles_removed) }}"
 
       - name: Convert code and admonitions
-        if: ${{ steps.compare-files.outputs.files_added }}
+        if: ${{ steps.compare-titles.outputs.titles_added }}
         uses: philnewm/markdown-conversion@main
         with:
-          markdown_file_urls: ${{ steps.compare-files.outputs.files_csv }}
+          markdown_file_urls: ${{ steps.compare-titles.outputs.titles_csv }}
           output_dir_code: ${{ github.workspace }}/code
 
       - name: Upload gh_output

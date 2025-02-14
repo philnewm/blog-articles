@@ -22,6 +22,7 @@ env:
   PYTHON_VERSION: "3.12"
   URL: "raw.githubusercontent.com/${{ github.repository }}/${{ github.ref_name }}"
   TARGET_REPO: "philnewm.github.io"
+  TARGET_BRANCH: "main"
   TARGET_PREFIX: "site/docs/"
 
 jobs:
@@ -38,7 +39,8 @@ jobs:
         # TODO change to publish branch when implemented
         run: |
           IGNORED_FILES_JSON=$(jq -R -c 'split(",")' <<< "${{ vars.IGNORED_FILES }}")
-          md_files_json=$(gh api repos/philnewm/blog-articles/git/trees/pages-debug?recursive=1 --jq '[.tree[].path | select(endswith(".md"))]')
+
+          md_files_json=$(gh api repos/philnewm/blog-articles/git/trees/${{ github.ref_name }}?recursive=1 --jq '[.tree[].path | select(endswith(".md"))]')
           md_files_json=$(echo $md_files_json | jq --argjson ignored "$IGNORED_FILES_JSON" 'map(select(. as $file | $ignored | index($file) | not))')
           md_files_str=$(echo $md_files_json | jq -c)
 
@@ -50,7 +52,7 @@ jobs:
         id: get-target-md-files
         run: |
           IGNORED_FILES_JSON=$(jq -R -c 'split(",")' <<< "${{ vars.IGNORED_FILES_TARGET }}")
-          md_files_json=$(gh api repos/philnewm/philnewm.github.io/git/trees/main?recursive=1 --jq '[.tree[].path | select(endswith(".md"))]')
+          md_files_json=$(gh api repos/philnewm/${{ env.TARGET_REPO }}/git/trees/${{ env.TARGET_BRANCH }}?recursive=1 --jq '[.tree[].path | select(endswith(".md"))]')
           md_files_json=$(echo $md_files_json | jq --argjson ignored "$IGNORED_FILES_JSON" 'map(select(. as $file | $ignored | index($file) | not))')
           md_files_json=$(echo $md_files_json | jq 'map(sub("^${{ env.TARGET_PREFIX }}"; ""))')
           md_files_str=$(echo $md_files_json | jq -c)
@@ -67,10 +69,9 @@ jobs:
       - name: Compare files
         id: compare-files
         run: |
-          source_files=$(echo '${{ steps.get-source-md-files.outputs.source_files }}' | jq -r)
           target_files=$(echo '${{ steps.get-target-md-files.outputs.target_files }}' | jq -r)
 
-          files_added=$(echo $source_files $target_files | jq -s -c '.[0] - .[1]')
+          files_added=$(echo '${{ steps.get-source-md-files.outputs.source_files }}' | jq -r)
           files_removed=$(echo $source_files $target_files | jq -s -c '.[1] - .[0]')
 
           echo "files_added=$files_added" >> $GITHUB_OUTPUT
@@ -79,8 +80,6 @@ jobs:
           base_url="https://raw.githubusercontent.com/${{ github.repository }}/refs/heads/${{ github.ref_name }}/"
           files_csv=$(echo "$files_added" | jq -r --arg base "$base_url" '[.[] | $base + .] | join(",")')
           echo "files_csv=$files_csv" >> $GITHUB_OUTPUT
-
-          # https://raw.githubusercontent.com/philnewm/blog-articles/refs/heads/pages-debug/
 
       - name: Debug output
         run: |
