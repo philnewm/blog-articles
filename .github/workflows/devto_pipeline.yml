@@ -1,0 +1,50 @@
+---
+
+  name: Dev.to Pipeline
+  
+  on:
+    # TODO remove this trigger after debugging
+    workflow_dispatch:
+    push:
+      branches:
+        - publish
+  
+    workflow_run:
+        workflows:
+        - getting-started-ci
+        types:
+        - completed
+  
+  permissions:
+    contents: read
+  
+  env:
+    PYTHON_VERSION: "3.12"
+    URL: "raw.githubusercontent.com/${{ github.repository }}/${{ github.ref_name }}"
+    TARGET_REPO: "philnewm.github.io"
+    TARGET_PREFIX: "site/docs/"
+  
+  jobs:
+    collect-markdown-files:
+      runs-on: ubuntu-latest
+      outputs:
+        files_added: ${{ steps.compare-files.outputs.files_added }}
+        files_removed: ${{ steps.compare-files.outputs.files_removed }}
+  
+      steps:
+        # TODO cleanup this query mess
+        - name: Get markdown files from ${{ github.repository}}
+          id: get-source-md-files
+          # TODO change to publish branch when implemented
+          run: |
+            IGNORED_FILES_JSON=$(jq -R -c 'split(",")' <<< "${{ vars.IGNORED_FILES }}")
+  
+            md_files_json=$(gh api repos/${{ github.repository }}/git/trees/${{ github.ref_name }}?recursive=1 --jq '[.tree[].path | select(endswith(".md"))]')
+            md_files_json=$(echo $md_files_json | jq --argjson ignored "$IGNORED_FILES_JSON" 'map(select(. as $file | $ignored | index($file) | not))')
+            md_files_str=$(echo $md_files_json | jq -c)
+  
+            echo "source_files=$md_files_str" >> $GITHUB_OUTPUT
+          env:
+            GH_TOKEN: ${{ github.token }}
+
+...
