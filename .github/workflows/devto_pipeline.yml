@@ -70,7 +70,6 @@ jobs:
           normalized_source_files=$(echo "${{ env.SOURCE }}" | jq -R -c 'split(" ") | map(sub(".md$"; ""))')
           normalized_target_articles=$(echo "${{ env.TARGET }}" | jq -c 'to_entries | map({ key: ( .key | sub("^https://philnewm.github.io/"; "") | sub("/$"; "") ), value: .value }) | from_entries')
 
-          files_removed=$(echo "$normalized_target_articles" "$normalized_source_files" | jq -sc '.[0] | keys - .[1]')
           md_to_id_mapping=$(jq -nc \
                       --argjson src "$(echo "${normalized_source_files[@]}" | jq -R -c 'split(" ") | map(sub(".md$"; ""))')" \
                       --argjson tgt "$normalized_target_articles" \
