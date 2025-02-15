@@ -67,8 +67,8 @@ jobs:
           TARGET: "${{ steps.get-target-articles.outputs.articles_map }}"
           BASE_URL: "https://raw.githubusercontent.com/${{ github.repository }}/refs/heads/${{ github.ref_name }}/"
         run: |
-          normalized_source_files=$(echo '${{ env.SOURCE }}' | jq -c map(sub("\\.md$"; ""))')
-          normalized_target_articles=$(echo '${{ env.TARGET }}' | jq -c 'to_entries | map({ key: ( .key | sub("^${{ env.TARGET_PREFIX }}"; "") | sub("/$"; "") ), value: .value }) | from_entries')
+          normalized_source_files=$(echo '${{ env.SOURCE }}' | jq -c 'map(sub("\\.md$"; ""))')
+          normalized_target_articles=$(echo '${{ env.TARGET }}' | jq -c 'to_entries | map({ key: ( .key | sub("^https://philnewm.github.io/"; "") | sub("/$"; "") ), value: .value }) | from_entries')
 
           echo "normalized_source_files: $normalized_source_files"
           echo "normalized_target_articles: $normalized_target_articles"
@@ -78,16 +78,21 @@ jobs:
                       --argjson tgt "$normalized_target_articles" \
                       '
                       reduce $src[] as $file ({}; 
-                        .[$file + ".md"] = if $tgt[$file] then $tgt[$file] else "" end
+                      .[$file + ".md"] = if $tgt[$file] then $tgt[$file] else "" end
                       )
                       | reduce ($tgt | keys[]) as $article (.;
-                          if not ($src | contains([$article])) then
-                            .[""] = $tgt[$article]
+                          if ($src | index($article)) == null then
+                          .[""] = $tgt[$article]
+                          else
+                          .
                           end
-                        )
+                      )
                       ')
 
           echo "files_map=$md_to_id_mapping" >> $GITHUB_OUTPUT
+
+          files_csv=$(echo '${{ env.SOURCE }}' | jq -r --arg base "https://raw.githubusercontent.com/philnewm/blog-articles/refs/heads/pages-debug/" '[.[] | $base + .] | join(",")')
+          echo "files_csv=$files_csv"
 
           files_csv=$(echo '${{ env.SOURCE }}' | jq -r --arg base "${{ env.BASE_URL }}" '[.[] | $base + .] | join(",")')
           echo "files_csv=$files_csv" >> $GITHUB_OUTPUT
