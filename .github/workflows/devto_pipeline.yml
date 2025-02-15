@@ -50,7 +50,7 @@ jobs:
       - name: Get article canonical_urls from dev.to
         id: get-target-canonical_urls
         run: |
-          canonical_urls=$(curl -H "api-key: ${{ secrets.DEVTO_KEY }}" https://dev.to/api/articles/me/all | jq -c '.[].canonical_url')
+          canonical_urls=$(curl -H "api-key: ${{ secrets.DEVTO_KEY }}" https://dev.to/api/articles/me/all | jq -c 'map({(.canonical_url): .id}) | add')
           canonical_urls_string=$(echo $canonical_urls | jq -c)
 
           echo "canonical_urls=$canonical_urls_string" >> $GITHUB_OUTPUT
