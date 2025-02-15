@@ -68,17 +68,20 @@ jobs:
           BASE_URL: "https://raw.githubusercontent.com/${{ github.repository }}/refs/heads/${{ github.ref_name }}/"
         run: |
           normalized_source_files=$(echo "${{ env.SOURCE }}" | jq -R -c 'split(" ") | map(sub(".md$"; ""))')
-          normalized_target_articles=$(echo "${{ env.TARGET }}" | jq -c 'to_entries | map({ key: ( .key | sub("^https://philnewm.github.io/"; "") | sub("/$"; "") ), value: .value }) | from_entries')
+          normalized_target_articles=$(echo "${{ env.TARGET }}" | jq -c 'to_entries | map({ key: ( .key | sub("^${{ env.TARGET_PREFIX }}"; "") | sub("/$"; "") ), value: .value }) | from_entries')
+
+          echo "normalized_source_files: $normalized_source_files"
+          echo "normalized_target_articles: $normalized_target_articles"
 
           md_to_id_mapping=$(jq -nc \
-                      --argjson src "$(echo "${normalized_source_files[@]}" | jq -R -c 'split(" ") | map(sub(".md$"; ""))')" \
+                      --argjson src "$normalized_source_files" \
                       --argjson tgt "$normalized_target_articles" \
                       '
                       reduce $src[] as $file ({}; 
                         .[$file + ".md"] = if $tgt[$file] then $tgt[$file] else "" end
                       )
                       | reduce ($tgt | keys[]) as $article (.;
-                          if ($src | index($article) | not) then
+                          if not ($src | contains([$article])) then
                             .[""] = $tgt[$article]
                           end
                         )
