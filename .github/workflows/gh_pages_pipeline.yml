@@ -98,7 +98,7 @@ jobs:
         run: |
           echo "Markdown files to remove: ${{ toJson(steps.compare-files.outputs.files_removed) }}"
 
-      - name: Convert code and admonitions
+      - name: Convert code
         if: ${{ steps.compare-files.outputs.files_added }}
         uses: philnewm/markdown-conversion@main
         with:
