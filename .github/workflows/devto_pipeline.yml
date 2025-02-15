@@ -67,8 +67,8 @@ jobs:
           TARGET: "${{ steps.get-target-canonical_urls.outputs.target_canonical_urls }}"
           BASE_URL: "https://raw.githubusercontent.com/${{ github.repository }}/refs/heads/${{ github.ref_name }}/"
         run: |
-          normalized_source_files=$(echo "${{ env.SOURCE }}" | jq -R -c 'split(" ") | map(sub(".md$"; ""))')
-          normalized_target_articles=$(echo "${{ env.TARGET }}" | jq -c 'to_entries | map({ key: ( .key | sub("^${{ env.TARGET_PREFIX }}"; "") | sub("/$"; "") ), value: .value }) | from_entries')
+          normalized_source_files=$(echo '${{ env.SOURCE }}' | jq -R -c 'split(" ") | map(sub(".md$"; ""))')
+          normalized_target_articles=$(echo '${{ env.TARGET }}'' | jq -c 'to_entries | map({ key: ( .key | sub("^${{ env.TARGET_PREFIX }}"; "") | sub("/$"; "") ), value: .value }) | from_entries')
 
           echo "normalized_source_files: $normalized_source_files"
           echo "normalized_target_articles: $normalized_target_articles"
