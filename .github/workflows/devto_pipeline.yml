@@ -100,7 +100,7 @@ jobs:
       - name: Debug output
         run: |
           echo "files_map=$(echo '${{ steps.compare-articles.outputs.files_map }}' | jq -r)"
-          echo "source_files=$(echo '${{ steps.compare-articles.outputs.files_csv }}' | jq -r)"
+          echo "source_files= ${{ steps.compare-articles.outputs.files_csv }}"
 
       # - name: Convert code and admonitions
       #   if: ${{ steps.compare-titles.outputs.files_added }}
