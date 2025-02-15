@@ -141,21 +141,4 @@ jobs:
             rm -f "/${{ github.workspace }}/site/docs/$file_path"
           done
 
-      - name: Verify Artifact Location
-        run: |
-          echo "Files in site/docs:"
-          ls -l /${{ github.workspace }}/site/docs
-
-      - name: Push new file to pages repo
-        run: |
-          if [[ -n $(git status --porcelain) ]]; then
-            git config user.name "github-actions[bot]"
-            git config user.email "github-actions[bot]@users.noreply.github.com"
-            git add .
-            git commit -m "[Automated] Update content"
-            git push
-          else
-            echo "::warning::No changes to sync."
-          fi
-
 ...
