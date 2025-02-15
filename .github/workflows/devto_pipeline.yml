@@ -51,7 +51,7 @@ jobs:
         id: get-target-articles
         run: |
           articles_map=$(curl -H "api-key: ${{ secrets.DEVTO_KEY }}" https://dev.to/api/articles/me/all | jq -c 'map({(.canonical_url): .id}) | add')
-          articles_string=$(echo $canonical_urls | jq -c)
+          articles_string=$(echo $articles_map | jq -c)
 
           echo "articles_map=$articles_string" >> $GITHUB_OUTPUT
 
