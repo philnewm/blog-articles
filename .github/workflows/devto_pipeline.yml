@@ -1,6 +1,6 @@
 ---
 
-name: Github Pages Pipeline
+name: Dev.to Pipeline
 
 on:
   # TODO remove this trigger after debugging
