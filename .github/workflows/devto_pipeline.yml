@@ -51,13 +51,13 @@ jobs:
         id: get-target-canonical_urls
         run: |
           canonical_urls=$(curl -H "api-key: ${{ secrets.DEVTO_KEY }}" https://dev.to/api/articles/me/all | jq -c '.[].canonical_url')
-          canonical_urls_string=$(echo $article_titles | jq -c)
+          canonical_urls_string=$(echo $canonical_urls | jq -c)
 
           echo "canonical_urls=$canonical_urls_string" >> $GITHUB_OUTPUT
 
       - name: Debug output
         run: |
-          echo "source_files=$(echo '${{ steps.get-source-md-files.outputs.titles }}' | jq -r)"
+          echo "source_files=$(echo '${{ steps.get-source-md-files.outputs.source_files }}' | jq -r)"
           echo "target_canonical_urls=$(echo '${{ steps.get-target-canonical_urls.outputs.canonical_urls }}' | jq -r)"
 
       # - name: Compare titles
