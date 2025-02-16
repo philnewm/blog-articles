@@ -28,7 +28,7 @@ jobs:
   collect-articles:
     runs-on: ubuntu-latest
     outputs:
-      files_map: ${{ steps.compare-articles.outputs.files_files }}
+      files_map: ${{ steps.compare-articles.outputs.files_map }}
       files_csv: ${{ steps.compare-articles.outputs.files_csv }}
 
     steps:
