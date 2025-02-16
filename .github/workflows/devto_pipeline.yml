@@ -144,7 +144,7 @@ jobs:
         with:
           articles_map: ${{ needs.collect-articles.outputs.files_map }}
           markdown_files_dir: "tmp/"
-          service: "dev.to"
+          service: "Devto"
           gh_pages_repo: ${{ env.TARGET_PREFIX }}
           key: ${{ secrets.DEVTO_KEY }}
           publish: ${{ vars.AUTO_PUBLISH }}
