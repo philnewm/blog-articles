@@ -126,7 +126,7 @@ jobs:
   push-to-devto:
     needs:
       - collect-articles
-    if: false  # ${{ needs.collect-markdown-files.outputs.files_added || needs.collect-markdown-files.outputs.files_removed }}
+    if: ${{ needs.collect-articles.outputs.files_csv }}
     # TODO put back in line after development
     # && github.event.workflow_run.head_branch == 'publish' }}
     runs-on: ubuntu-latest
