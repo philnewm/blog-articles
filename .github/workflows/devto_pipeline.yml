@@ -115,6 +115,7 @@ jobs:
           output_dir_code: ${{ github.workspace }}/code
           output_dir_admonitions: ${{ github.workspace }}/admonitions
 
+      # INFO admonitions file includes code conversion - which is a design issue
       - name: Upload gh_output
         uses: actions/upload-artifact@v4
         with:
