@@ -34,11 +34,11 @@ jobs:
 
       - name: Install ubuntu dependencies
         run: |
-          sudo apt-get install python${{ env.PYTHON_VERSION }}-venv python3-pip -y
+          sudo apt-get install python3.12-venv python3-pip -y
 
       - name: Create virtual environment
         run: |
-          python${{ env.PYTHON_VERSION }} -m venv ~/.venv/ansible_env
+          python3.12 -m venv ~/.venv/ansible_env
           source ~/.venv/ansible_env/bin/activate
 
       - name: Ensure global venv for this workflow
@@ -145,8 +145,8 @@ jobs:
       - name: Initialize vagrant scenario
         run: |
           molecule init scenario default --driver-name vagrant --provisioner-name ansible
-          cp ~/.venv/ansible_env/lib/python${{ env.PYTHON_VERSION }}/site-packages/molecule_plugins/vagrant/playbooks/create.yml molecule/default/create.yml
-          cp ~/.venv/ansible_env/lib/python${{ env.PYTHON_VERSION }}/site-packages/molecule_plugins/vagrant/playbooks/destroy.yml molecule/default/destroy.yml
+          cp ~/.venv/ansible_env/lib/python3.12/site-packages/molecule_plugins/vagrant/playbooks/create.yml molecule/default/create.yml
+          cp ~/.venv/ansible_env/lib/python3.12/site-packages/molecule_plugins/vagrant/playbooks/destroy.yml molecule/default/destroy.yml
           mv requirements.yml molecule/default/requirements.yml
           mv molecule.yml molecule/default/molecule.yml
           mv converge.yml molecule/default/converge.yml

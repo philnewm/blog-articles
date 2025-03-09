@@ -4,6 +4,13 @@
 
 Stores draft and published blog-articles together with their required resources.
 
+## Markdown rules
+
+- Articles title should be Header 1 (#)
+- Place separators under chapter titles, Header 2 (##)
+- Article should be valid markdown
+- Specific terms should be formatted *italic*
+
 ## Branch-States
 
 | Article         | CI-State                                                                                                                                                                                                                                                 | Code-Conversion |

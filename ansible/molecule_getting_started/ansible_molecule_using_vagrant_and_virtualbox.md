@@ -4,8 +4,9 @@ tags:
   - molecule
   - automation
   - blog
+description: Set up basic CI for Ansible using Molecule
 ---
-# Getting started with Ansible Molecule
+# Getting started with Molecule
 
 ## Intro
 
@@ -313,6 +314,8 @@ Now you should be able to run `molecule verify` to have these tests run against 
 Explain what gets saved where and how does the ephemermal directory work
 
 @@TODO Location of ephermal directory might have changed according to [release notes](https://github.com/ansible/molecule/releases/tag/v25.2.0)
+
+@@TODO add user/super-user prefix to commands
 
 ## Wrap-Up
 
