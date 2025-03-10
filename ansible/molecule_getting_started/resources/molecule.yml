@@ -21,7 +21,6 @@ provisioner:
   config_options:
     defaults:
       stdout_callback: debug
-      callbacks_enabled: ansible.posix.profile_tasks
     env:
       ANSIBLE_FORCE_COLOR: "true"
 verifier:

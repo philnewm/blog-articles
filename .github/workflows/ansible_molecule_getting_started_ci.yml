@@ -147,7 +147,6 @@ jobs:
           molecule init scenario default --driver-name vagrant --provisioner-name ansible
           cp ~/.venv/ansible_env/lib/python3.12/site-packages/molecule_plugins/vagrant/playbooks/create.yml molecule/default/create.yml
           cp ~/.venv/ansible_env/lib/python3.12/site-packages/molecule_plugins/vagrant/playbooks/destroy.yml molecule/default/destroy.yml
-          mv requirements.yml molecule/default/requirements.yml
           mv molecule.yml molecule/default/molecule.yml
           mv converge.yml molecule/default/converge.yml
           mv verify.yml molecule/default/verify.yml
