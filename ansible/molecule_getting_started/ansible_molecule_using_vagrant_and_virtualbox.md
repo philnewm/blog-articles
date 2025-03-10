@@ -18,7 +18,7 @@ The code in this guide was developed and tested on AlmaLinux9 and Ubuntu22.04 fo
 ## Requirements
 
 ---
-
+@@TODO note where to get reference files
 ### System
 
 Since we will use *VirtualBox* virtual Machines in this guide it's required for your system to have virtualization enabled in your mainboard's BIOS or UEFI.
@@ -51,7 +51,7 @@ ln: true
 Next we need a bunch of python packages like Ansible, Molecule and its *Vagrant* plugin.
 
 Create a project directory and `cd` into it.
-At the time of writing there seems to be a [bug](https://github.com/ansible-community/molecule-plugins/issues/301) with the latest version of molecule (v25.3.1) in context of the molecule plugins package.
+At the time of writing there seems to be a [bug](https://github.com/ansible-community/molecule-plugins/issues/301) with the latest version of molecule-plugins when used with the latest version of molecule (v25.3.1).
 That's why we go for the versions listed here since they seem to work fine together.
 Create a `requirements.txt` file containing these lines:
 
@@ -123,7 +123,7 @@ sudo dnf install VirtualBox-7.1 -y
 
 Verify the successful installation of both tools by checking their version.
 
-```bash linenums="1"
+```shell linenums="1"
 VBoxManage --version
 vagrant --version
 ```
@@ -146,7 +146,7 @@ fold: true
 ln: true
 ```
 
-For now we'll just go with the *default* scenario to keep it simple.
+For now, we'll just go with the *default* scenario to keep it simple.
 Now you got a "molecule" directory inside the role containing a bunch of default .yml files.
 
 ```code title="Role Structure"
@@ -208,7 +208,7 @@ This will create a default instance using the [delegated driver](https://ansible
 As the title suggests we will use Vagrant as driver with VirtualBox as a provider in this example.
 So run `molecule destroy` to remove that default instance again.
 If you run `molecule drivers` you should see a list of installed drivers including `vagrant`.
-In case vagrant  is missing, please check again if you installed all [requirements](#requirements), including the Vagrant plugin.
+In case vagrant is missing, please check again if you installed all [requirements](#requirements), including the Vagrant plugin.
 Take a look at the [molecule-plugins repository](https://github.com/ansible-community/molecule-plugins/blob/main/README.md) for additional information
 
 ### Cleaning up
@@ -234,7 +234,7 @@ ln: true
 You can find some explanation of all these settings in the [Ansible molecule docs](https://ansible.readthedocs.io/projects/molecule/getting-started/#inspecting-the-moleculeyml)
 > [!info]- VirtualBox Network Setup
 > Assigning a network-interface using a `192.168.56.X` address is crucial here.
-> VirtualBox sets up two virtual networks  by default.
+> VirtualBox sets up two virtual networks by default.
 >
 > * vboxnet0 - which is Host-only using 192.168.56.1
 > * NatNetwork - using 10.0.2.X
@@ -253,14 +253,9 @@ fold: true
 ln: true
 ```
 
-@@ TODO research line number referencing in Ansible books
-Line 1: Initialize a new scenario using explicit parameters to use vagrant
-Line 2: The default `create.yml` file will cause connection issues on start-up so we fix this by copying the one from the molecule vagrant plugin itself
-Line 3: The default `destroy.yml`file won't destroy the vagrant box itself so we replace it by copying the one from the molecule vagrant plugin itself
-Line 4: @@TODO try to get rid of this line - requires removing debug formatting from molecule.yml
-Line 5: Now replace the molecule config file `molecule/default/molecule.yml` with the provided one which uses AlmaLinux9. - Get other vagrant boxes on [vagrant cloud](https://portal.cloud.hashicorp.com/vagrant/discover/almalinux/9)
-Line 6: Same goes for the `converge.yml` playbook
-Line 7: Same goes for the `verify.yml` playbook
+Here we begin by initializing a new molecule scenario using flags to explicitly set the driver and provisioner names.
+Next we copy the default `create.yml` and `destroy.yml` files since the default ones will cause connection issues on start-up.
+Now replace the molecule config file `molecule.yml` as well as the `converge.yml` and `verify.yml` with the provided ones which use AlmaLinux9. - Get other vagrant boxes on [vagrant cloud](https://portal.cloud.hashicorp.com/vagrant/discover/almalinux/9)
 
 Running `molecule create` and `molecule list` when it's done should now display a vagrant instance.
 
@@ -318,4 +313,3 @@ ___
 
 Now you got a basic functional setup to implement an Ansible role and test it in a automated and easy to use way against VirtualBox virtual Machines.
 This kind of setup is also quite extensible with additional automations and convenience features as I'll show you in the following articles of this series.
-

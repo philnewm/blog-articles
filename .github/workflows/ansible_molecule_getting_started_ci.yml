@@ -61,7 +61,7 @@ jobs:
           echo "LOGNAME=$USER" >> $GITHUB_ENV
           echo "USER=$(whoami)" >> $GITHUB_ENV
 
-      - name: Install Virtualbox 7.1.4
+      - name: Install Virtualbox 7.1.6
         run: |
           sudo sh -c 'echo "deb [arch=amd64 signed-by=/usr/share/keyrings/oracle-virtualbox-2016.gpg] https://download.virtualbox.org/virtualbox/debian $(lsb_release -sc) contrib" >> /etc/apt/sources.list'
           wget -O- https://www.virtualbox.org/download/oracle_vbox_2016.asc | sudo gpg --yes --output /usr/share/keyrings/oracle-virtualbox-2016.gpg --dearmor
