@@ -13,12 +13,14 @@ description: Set up basic CI for Ansible using Molecule
 ---
 
 This article is intended as a guide to set up Ansible Molecule for testing Ansible roles by running them against virtual machines. These virtual machines will be controlled by Vagrant using VirtualBox as provider.
-The code in this guide was developed and tested on AlmaLinux9 and Ubuntu22.04 for the software versions mentioned in [Requirements](#requirements)
+The code in this guide was developed and tested on AlmaLinux9 and Ubuntu22.04 for the software versions mentioned in [Requirements](#requirements).
+
+All static files used throughout this guide can be found [here](https://github.com/philnewm/blog-articles/tree/draft/ansible/molecule_getting_started/resources)
 
 ## Requirements
 
 ---
-@@TODO note where to get reference files
+
 ### System
 
 Since we will use *VirtualBox* virtual Machines in this guide it's required for your system to have virtualization enabled in your mainboard's BIOS or UEFI.
@@ -32,7 +34,7 @@ It does however support remote controlling [Windows hosts](https://docs.ansible.
 ### Python
 
 You will need python >= 3.10 to install the latest versions of all required python packages.
-Additional the python-venv and python-pip package will be required.
+Additional the `python-venv` and `python-pip` packages will be required.
 Here just the example install command for Ubuntu22.04
 `sudo apt-get install python3.12 python3.12-venv python3-pip`
 
@@ -246,8 +248,8 @@ You can find some explanation of all these settings in the [Ansible molecule doc
 ```reference
 title: "Initialize vagrant scenario"
 file: ./.github/workflows/ansible_molecule_getting_started_ci.yml
-start: 147
-end: "+6"
+start: 146
+end: "+5"
 language: shell
 fold: true
 ln: true
@@ -303,7 +305,7 @@ ln: true
 ```
 
 Place these tasks into a file called `tests.yml` in the tasks directory to make them easily accessible.
-Now you should be able to run `molecule verify` to have these tests run against the VM.
+Now you should be able to run `molecule verify` to have these tests run against the virtual machine.
 
 @@TODO add user/super-user prefix to commands
 
@@ -311,5 +313,5 @@ Now you should be able to run `molecule verify` to have these tests run against 
 
 ___
 
-Now you got a basic functional setup to implement an Ansible role and test it in a automated and easy to use way against VirtualBox virtual Machines.
+Now you got a basic functional setup to implement an Ansible role and test it in an automated and easy to use way against VirtualBox virtual machines.
 This kind of setup is also quite extensible with additional automations and convenience features as I'll show you in the following articles of this series.
