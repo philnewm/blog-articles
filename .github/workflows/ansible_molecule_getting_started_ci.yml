@@ -126,7 +126,6 @@ jobs:
       - name: Get ressources
         run: |
           curl -O "https://raw.githubusercontent.com/${{ github.repository }}/${{ env.BRANCH_REF }}/${{ env.RES_PATH }}/molecule.yml"
-          curl -O "https://raw.githubusercontent.com/${{ github.repository }}/${{ env.BRANCH_REF }}/${{ env.RES_PATH }}/requirements.yml"
           curl -O https://raw.githubusercontent.com/${{ github.repository }}/${{ env.BRANCH_REF }}/${{ env.RES_PATH }}/converge.yml
           curl -O https://raw.githubusercontent.com/${{ github.repository }}/${{ env.BRANCH_REF }}/${{ env.RES_PATH }}/verify.yml
           curl -O https://raw.githubusercontent.com/${{ github.repository }}/${{ env.BRANCH_REF }}/${{ env.RES_PATH }}/tasks.yml
