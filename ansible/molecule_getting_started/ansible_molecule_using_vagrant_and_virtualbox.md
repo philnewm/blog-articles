@@ -263,7 +263,7 @@ Running `molecule create` and `molecule list` when it's done should now display 
 
 ### Access Vagrant Instance
 
-Accessing an instance is supposed to be done by running `molecule login`, this might not work correctly for versions before [v23.6.0](https://github.com/ansible-community/molecule-plugins/releases/tag/v23.6.0) due to a [bug](https://github.com/ansible-community/molecule-plugins/issues/239).
+Accessing an instance is supposed to be done by running `molecule login --host <hostname>`, this might not work correctly for molecule versions before [v23.6.0](https://github.com/ansible-community/molecule-plugins/releases/tag/v23.6.0) due to a [bug](https://github.com/ansible-community/molecule-plugins/issues/239).
 If you are using a version >= v23.6.0 this should work right away.
 If you encounter this issue you can run `vagrant global-status` to get the vagrant instance IDs and `vagrant ssh <id>` to log into one of the VMs displayed. Afterwards just type `exit` to drop out of the instance again.
 
