@@ -315,3 +315,5 @@ ___
 
 Now you got a basic functional setup to implement an Ansible role and test it in an automated and easy to use way against VirtualBox virtual machines.
 This kind of setup is also quite extensible with additional automations and convenience features as I'll show you in the following articles of this series.
+
+@@ TODO research what other put here in the end

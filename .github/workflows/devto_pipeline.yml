@@ -114,6 +114,7 @@ jobs:
         with:
           markdown_file_urls: ${{ steps.compare-articles.outputs.files_csv }}
           output_dir_code: ${{ github.workspace }}/code
+          fence_formatting: False
           output_dir_admonitions: ${{ github.workspace }}/admonitions
 
       # INFO admonitions file includes code conversion - which is a design issue
@@ -143,6 +144,7 @@ jobs:
 
       - name: Apply changes to articles
         uses: philnewm/blog-upload@main
+        # TODO fix static reference to TARGET_PREFIX
         with:
           articles_map: ${{ needs.collect-articles.outputs.files_map }}
           markdown_files_dir: "${{ github.workspace }}/tmp/"
