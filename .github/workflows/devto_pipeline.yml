@@ -22,7 +22,7 @@ env:
   PYTHON_VERSION: "3.12"
   URL: "raw.githubusercontent.com/${{ github.repository }}/${{ github.ref_name }}"
   TARGET_REPO: "philnewm.github.io"
-  TARGET_PREFIX: "https://philnewm.github.io/"
+  TARGET_PREFIX: "https://philnewm.github.io//"
 
 jobs:
   collect-articles:
