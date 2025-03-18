@@ -22,7 +22,7 @@ env:
   PYTHON_VERSION: "3.12"
   URL: "raw.githubusercontent.com/${{ github.repository }}/${{ github.ref_name }}"
   TARGET_REPO: "philnewm.github.io"
-  TARGET_PREFIX: "https://philnewm.github.io//"
+  TARGET_PREFIX: "https://philnewm.github.io"
 
 jobs:
   collect-articles:
@@ -74,7 +74,7 @@ jobs:
         # INFO so far no checks if any changes actual happened
         run: |
           normalized_source_files=$(echo '${{ env.SOURCE }}' | jq -c 'map(sub("\\.md$"; ""))')
-          normalized_target_articles=$(echo '${{ env.TARGET }}' | jq -c 'to_entries | map({ key: ( .key | sub("^${{ env.TARGET_PREFIX }}"; "") | sub("/$"; "") ), value: .value }) | from_entries')
+          normalized_target_articles=$(echo '${{ env.TARGET }}' | jq -c 'to_entries | map({ key: ( .key | sub("^${{ env.TARGET_PREFIX }}/"; "") | sub("/$"; "") ), value: .value }) | from_entries')
 
           echo "normalized_source_files: $normalized_source_files"
           echo "normalized_target_articles: $normalized_target_articles"
