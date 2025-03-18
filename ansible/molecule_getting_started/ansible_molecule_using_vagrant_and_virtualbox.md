@@ -311,7 +311,7 @@ Now you should be able to run `molecule verify` to have these tests run against 
 
 ## Wrap-Up
 
-___
+---
 
 Now you got a basic functional setup to implement an Ansible role and test it in an automated and easy to use way against VirtualBox virtual machines.
 This kind of setup is also quite extensible with additional automations and convenience features as I'll show you in the following articles of this series.

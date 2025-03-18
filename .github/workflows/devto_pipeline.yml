@@ -114,8 +114,8 @@ jobs:
         with:
           markdown_file_urls: ${{ steps.compare-articles.outputs.files_csv }}
           output_dir_code: ${{ github.workspace }}/code
-          fence_formatting: "false"
           output_dir_admonitions: ${{ github.workspace }}/admonitions
+          code_parameters: "true"
 
       # INFO admonitions file includes code conversion - which is a design issue
       - name: Upload gh_output
