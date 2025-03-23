@@ -29,6 +29,7 @@ jobs:
     steps:
       - name: Get latest file changes from ${{ github.repository}}/refs/heads/${{ github.ref_name }}
         # Warning will brake if commas (",") are used in filepaths
+        # TODO test if this works for multiple commits as well
         id: latest-changes
         run: |
           # INFO Get commit hashes from two latest pushes
