@@ -1,10 +1,21 @@
 ---
+slug: molecule-start
+description: Set up basic CI for Ansible using Molecule
 tags:
   - ansible
   - molecule
   - automation
-  - blog
-description: Set up basic CI for Ansible using Molecule
+authors:
+  - philipp
+date:
+  created: 2025-03-20
+  updated: 2025-03-22
+categories:
+  - infrastructure
+ci: ansible_molecule_getting_started_ci
+devto: true
+gh_pages: true
+draft: true
 ---
 # Getting started with Molecule
 
@@ -59,7 +70,7 @@ Create a `requirements.txt` file containing these lines:
 
 ```reference
 title: "requirements.txt"
-file: ./ansible/molecule_getting_started/resources/requirements.txt
+file: molecule_getting_started/resources/requirements.txt
 language: shell
 fold: true
 ln: true
@@ -227,7 +238,7 @@ Running `molecule reset` might result in a python-traceback in some versions of 
 
 ```reference
 title: "molecule.yml"
-file: ./ansible/molecule_getting_started/resources/molecule.yml
+file: molecule_getting_started/resources/molecule.yml
 language: yaml
 fold: true
 ln: true
@@ -276,7 +287,7 @@ This is just a very basic example for demonstration.
 
 ```reference
 title: "tasks.yml"
-file: ./ansible/molecule_getting_started/resources/tasks.yml
+file: molecule_getting_started/resources/tasks.yml
 language: yaml
 fold: true
 ln: true
@@ -298,7 +309,7 @@ Take a look now at these test tasks which should be self-explanatory due to thei
 
 ```reference
 title: "tests.yml"
-file: ./ansible/molecule_getting_started/resources/tests.yml
+file: molecule_getting_started/resources/tests.yml
 language: yaml
 fold: true
 ln: true
@@ -307,13 +318,11 @@ ln: true
 Place these tasks into a file called `tests.yml` in the tasks directory to make them easily accessible.
 Now you should be able to run `molecule verify` to have these tests run against the virtual machine.
 
-@@TODO add user/super-user prefix to commands
-
 ## Wrap-Up
 
 ---
 
-Now you got a basic functional setup to implement an Ansible role and test it in an automated and easy to use way against VirtualBox virtual machines.
-This kind of setup is also quite extensible with additional automations and convenience features as I'll show you in the following articles of this series.
+Now you got a basic setup to implement an Ansible role and test it in an automated and easy to use way against VirtualBox virtual machines.
+This kind of setup is also quite extensible with additional logic and convenience features as I'll show you in the following articles of this series.
 
 @@ TODO research what other put here in the end

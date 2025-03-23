@@ -3,17 +3,7 @@
 name: Github Pages Pipeline
 
 on:
-  # TODO remove this trigger after debugging
-  workflow_dispatch:
-  push:
-    branches:
-      - publish
-
-  workflow_run:
-      workflows:
-      - getting-started-ci
-      types:
-      - completed
+  workflow_call:
 
 permissions:
   contents: read

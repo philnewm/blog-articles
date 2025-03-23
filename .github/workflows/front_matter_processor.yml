@@ -1,0 +1,74 @@
+---
+
+name: Process markdown front matter
+
+on:
+  workflow_call:
+    inputs:
+      markdown_file_path:
+        type: string
+        description: "Path to a markdown file"
+        required: true
+    outputs:
+      front_matter:
+        description: "Front matter of the markdown file"
+        value: ${{ jobs.frontmatter-processor.outputs.front_matter }}
+      ci_file:
+        description: "CI file"
+        value: ${{ jobs.frontmatter-processor.outputs.ci_file }}
+      devto:
+        description: "Dev.to upload requested"
+        value: ${{ jobs.frontmatter-processor.outputs.devto }}
+      github_pages:
+        description: "GitHub Pages upload requested"
+        value: ${{ jobs.frontmatter-processor.outputs.github_pages }}
+      draft:
+        description: "Draft status"
+        value: ${{ jobs.frontmatter-processor.outputs.draft }}
+
+permissions:
+  contents: read
+
+jobs:
+  frontmatter-processor:
+    runs-on: ubuntu-latest
+
+    outputs:
+      front_matter: ${{ steps.extract_frontmatter.outputs.front_matter }}
+      draft: ${{ steps.extract_frontmatter.outputs.draft }}
+      ci_file: ${{ steps.extract_frontmatter.outputs.ci_file }}
+      devto: ${{ steps.extract_frontmatter.outputs.devto }}
+      github_pages: ${{ steps.extract_frontmatter.outputs.github_pages }}
+
+    steps:
+      - name: Update `updated` date
+        run: |
+          DATE_FORMAT="+%Y-%m-%d"
+          UPDATED=$(date "$DATE_FORMAT")
+
+          awk -v updated="$UPDATED" '
+              NR==1 && $0=="---" {inside=1; print; next}
+              inside && $1=="updated:" {print "  updated: " updated; next}
+              inside && $0=="---" {inside=0}
+              {print}
+          ' "${{ env.FILE }}" > temp.md && mv temp.md "${{ env.FILE }}"
+        env:
+          FILE: ${{ inputs.markdown_file_path }}
+
+      - name: Install yq
+        run: |
+          sudo wget https://github.com/mikefarah/yq/releases/download/v4.44.3/yq_linux_amd64 -O /usr/bin/yq && sudo chmod +x /usr/bin/yq
+
+      - name: Extract frontmatter
+        id: extract_frontmatter
+        run: |
+          FRONT_MATTER=$(awk 'NR==1 && $0=="---" {inside=1; next} inside && $0=="---" {exit} inside {print}' "${{ env.File }}")
+
+          echo "fron_matter=$FRONT_MATTER" >> $GITHUB_OUTPUT
+
+          ci_file=$(echo "$FRONT_MATTER" | yq '.ci')
+          devto=$(echo "$FRONT_MATTER" | yq '.devto')
+          github_pages=$(echo "$FRONT_MATTER" | yq '.gh_pages')
+          draft=$(echo "$FRONT_MATTER" | yq '.draft')
+        env:
+          FILE: ${{ inputs.markdown_file_path }}

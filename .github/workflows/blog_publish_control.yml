@@ -1,0 +1,65 @@
+---
+
+name: Blog publishing controller
+    
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - publish
+      - draft
+    paths:
+      - "**/resources/**"
+      - "**.md"
+    paths-ignore:
+      - "TODO.md"
+      - "README.md"
+      - ".gitignore"
+      - ".obsidian/**"
+
+
+permissions:
+  contents: read
+
+jobs:
+  get-changed-md-files:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Get latest file changes
+        id: latest-changes
+        run: |
+          # INFO Get commit hashes from two latest pushes
+          read BASE_SHA HEAD_SHA < <(gh api repos/philnewm/blog-articles/events --jq '[ .[] | select(.type=="PushEvent") ][0] | [.payload.before, .payload.head] | join(" ")')
+
+          echo "Comparing changes between $BASE_SHA and $HEAD_SHA"
+
+          CHANGES=$(gh api repos/philnewm/blog-articles/compare/$BASE_SHA...$HEAD_SHA --jq '
+            {
+              added:   [ .files[] | select(.status=="added") | .filename ],
+              edited:  [ .files[] | select(.status=="modified") | .filename ],
+              removed: [ .files[] | select(.status=="removed") | .filename ]
+            }')
+
+          # INFO compact (-c) jq for single line strings
+          ADDED_FILES=$(echo "$CHANGES" | jq -c '.added | join(",")')
+          EDITED_FILES=$(echo "$CHANGES" | jq -c '.edited | join(",")')
+          REMOVED_FILES=$(echo "$CHANGES" | jq -c '.removed | join(",")')
+
+          echo "added_files=$ADDED_FILES" >> $GITHUB_OUTPUT
+          echo "edited_files=$EDITED_FILES" >> $GITHUB_OUTPUT
+          echo "removed_files=$REMOVED_FILES" >> $GITHUB_OUTPUT
+
+      - name: Debug Fiel changes sorted
+        run: |
+          echo "Added files: ${{ steps.latest-changes.outputs.added_files }}"
+          echo "Edited files: ${{ steps.latest-changes.outputs.edited_files }}"
+          echo "Removed files: ${{ steps.latest-changes.outputs.removed_files }}"
+
+
+  # get-front-matter:
+  #   uses: philnewm/blog-articles/.github/workflows/front_matter_processor.yml
+
+  # run-ci:
+  #   if: ${{ jobs.get-fron-matter.outputs.ci_file }}
+

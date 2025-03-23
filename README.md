@@ -10,6 +10,7 @@ Stores draft and published blog-articles together with their required resources.
 - Place separators under chapter titles, Header 2 (##)
 - Article should be valid markdown
 - Specific terms should be formatted *italic*
+- Use `sudo` for commands expected to be run as root
 
 ## Branch-States
 
