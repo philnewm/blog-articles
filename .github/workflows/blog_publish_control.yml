@@ -11,11 +11,10 @@ on:
     paths:
       - "**/resources/**"
       - "**.md"
-    paths-ignore:
-      - "TODO.md"
-      - "README.md"
-      - ".gitignore"
-      - ".obsidian/**"
+      - "!TODO.md"
+      - "!README.md"
+      - "!.gitignore"
+      - "!.obsidian/**"
 
 
 permissions:
