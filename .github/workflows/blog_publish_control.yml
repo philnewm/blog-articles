@@ -27,11 +27,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Get latest file changes
+      - name: Get latest file changes from ${{ github.repository}}/${{ github.ref_name }}
         id: latest-changes
         run: |
           # INFO Get commit hashes from two latest pushes
-          read BASE_SHA HEAD_SHA < <(gh api repos/philnewm/blog-articles/events --jq '[ .[] | select(.type=="PushEvent") ][0] | [.payload.before, .payload.head] | join(" ")')
+          read BASE_SHA HEAD_SHA < <(gh api repos/${{ github.repository}}/events --jq '[ .[] | select(.type=="PushEvent" and .payload.ref == "refs/heads/${{ github.ref_name }}) ][0] | [.payload.before, .payload.head] | join(" ")')
 
           echo "Comparing changes between $BASE_SHA and $HEAD_SHA"
 
@@ -51,7 +51,7 @@ jobs:
           echo "edited_files=$EDITED_FILES" >> $GITHUB_OUTPUT
           echo "removed_files=$REMOVED_FILES" >> $GITHUB_OUTPUT
 
-      - name: Debug Fiel changes sorted
+      - name: Debug file changes sorted
         run: |
           echo "Added files: ${{ steps.latest-changes.outputs.added_files }}"
           echo "Edited files: ${{ steps.latest-changes.outputs.edited_files }}"
