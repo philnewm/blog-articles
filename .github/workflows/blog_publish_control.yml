@@ -16,6 +16,8 @@ on:
       - "!.gitignore"
       - "!.obsidian/**"
 
+env:
+  GH_TOKEN: ${{ github.token }}
 
 permissions:
   contents: read
