@@ -105,17 +105,15 @@ jobs:
             fi
 
             if [[ "$file_path" == *"workflows"* && "$file_path" == *.yml ]]; then
-              # INFO download files
+              # INFO download file
               mkdir -p "$(dirname "$file_path")"
               wget "https://raw.githubusercontent.com/${{ github.repository }}/${{ github.ref_name }}/$file_path" -O "$file_path"
               res_path=$(yq eval '.env.RES_PATH // ""' "$file_path" 2>/dev/null)
-              echo "res_path: $res_path"
-              echo "yq applied"
 
               if [[ -n "$res_path" ]]; then
                 echo "File is a workflow file"
                 stripped_path="${res_path///resources/}"
-                # WARNING breaks if paths doesn't exist anymore
+                # WARNING breaks if path doesn't exist anymore due to changes between commits
                 md_files=$(gh api repos/philnewm/blog-articles/contents/"$stripped_path"?ref=${{ github.ref_name }} | jq -r '.[] | select(.name | endswith(".md")) | .name')
 
                 for md_file in $md_files; do
@@ -160,7 +158,7 @@ jobs:
 
       - name: Update latest push commit sha
         run: |
-          echo "Latest push commit sha: ${{ steps.latest-changes.outputs.latest_commit_sha }}"
+          echo "::notice::Setting latest push commit sha: ${{ steps.latest-changes.outputs.latest_commit_sha }}"
           gh variable set LATEST_PUSH_COMMIT_SHA --repo ${{ github.repository}} --body ${{ steps.latest-changes.outputs.latest_commit_sha }}
         env:
           GH_TOKEN: ${{ secrets.PAGES_PAT }}
