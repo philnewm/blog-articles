@@ -106,7 +106,7 @@ jobs:
 
             if [[ "$file_path" == *"workflows"* && "$file_path" == *.yml ]]; then
               # INFO download files
-              mkdir -p '$(dirname "$file_path")'
+              mkdir -p "$(dirname "$file_path")"
               wget "https://raw.githubusercontent.com/${{ github.repository }}/main/$file_path" -O "$file_path"
               res_path=$(yq eval '.env.RES_PATH // ""' "$file_path" 2>/dev/null)
               echo "res_path: $res_path"
