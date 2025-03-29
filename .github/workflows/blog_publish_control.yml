@@ -28,23 +28,22 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Show shas
-        run: |
-          echo "before: ${{ github.event.before }}"
-          echo "after: ${{ github.event.after }}"
-
       - name: Get latest file changes from ${{ github.repository}}/refs/heads/${{ github.ref_name }}
         # Warning will brake if commas (",") are used in filepaths
         id: latest-changes
         run: |
-          # INFO Get commit hashes from two latest pushes
-          read HEAD_SHA BASE_SHA < <(gh api repos/philnewm/blog-articles/events --jq '[ .[] | select(.type=="PushEvent" and .payload.ref == "refs/heads/${{ github.ref_name }}") ][0] | [.payload.head, .payload.before] | join(" ")')
+          # INFO repo events endpoint is not meant for realtime usage - see https://docs.github.com/en/rest/activity/events?apiVersion=2022-11-28#list-repository-events
+          # read HEAD_SHA BASE_SHA < <(gh api repos/philnewm/blog-articles/events --jq '[ .[] | select(.type=="PushEvent" and .payload.ref == "refs/heads/${{ github.ref_name }}") ][0] | [.payload.head, .payload.before] | join(" ")')
 
-          echo "HEAD SHA: $HEAD_SHA"
-          echo "BASE SHA: $BASE_SHA"
+          LATEST_COMMIT_SHA=$(gh api repos/philnewm/blog-articles/commits?sha=draft --jq '.[0].sha')
+          LATEST_PUSH_LATEST_COMMIT_SHA=${{ vars.LATEST_PUSH_COMMIT_SHA }}
+
+          echo "latest_commit_sha=$LATEST_COMMIT_SHA" >> $GITHUB_OUTPUT
+          echo "Latest Commit: $LATEST_COMMIT_SHA"
+          echo "Second latest push commit SHA: $LATEST_PUSH_LATEST_COMMIT_SHA"
 
           EXCLUDE_LIST=("README.md" "TODO.md" ".obsidian/")
-          CHANGES=$(gh api repos/philnewm/blog-articles/compare/$BASE_SHA...$HEAD_SHA)
+          CHANGES=$(gh api repos/philnewm/blog-articles/compare/$LATEST_PUSH_LATEST_COMMIT_SHA...$LATEST_COMMIT_SHA)
           EXCLUDE_JSON=$(printf '%s\n' "${EXCLUDE_LIST[@]}" | jq -R . | jq -s .)
           FILTERED_CHANGES=$(echo "$CHANGES" | jq --argjson exclude_list "$EXCLUDE_JSON" '
             def is_excluded($filename):
@@ -144,6 +143,10 @@ jobs:
           echo "Edited files: ${{ steps.latest-changes.outputs.edited_files }}"
           echo "Removed files: ${{ steps.latest-changes.outputs.removed_files }}"
 
+      - name: Update latest push commit sha
+        run: |
+          echo "Latest push commit sha: ${{ steps.latest-changes.outputs.latest_commit_sha }}"
+          gh variable set LATEST_PUSH_COMMIT_SHA --repo ${{ github.repository}} --body ${{ steps.latest-changes.outputs.latest_commit_sha }}
 
   # get-front-matter:
   #   uses: philnewm/blog-articles/.github/workflows/front_matter_processor.yml
