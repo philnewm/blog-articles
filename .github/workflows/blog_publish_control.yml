@@ -4,18 +4,18 @@ name: Blog publishing controller
     
 on:
   workflow_dispatch:
-  # push:
-  #   branches:
-  #     - publish
-  #     - draft
-  #   paths:
-  #     - "**/resources/**"
-  #     - "**.md"
-  #     - "**/workflows/**"
-  #     - "!TODO.md"
-  #     - "!README.md"
-  #     - "!.gitignore"
-  #     - "!.obsidian/**"
+  push:
+    branches:
+      - publish
+      - draft
+    paths:
+      - "**/resources/**"
+      - "**.md"
+      - "**/workflows/**"
+      - "!TODO.md"
+      - "!README.md"
+      - "!.gitignore"
+      - "!.obsidian/**"
 
 env:
   GH_TOKEN: ${{ github.token }}
@@ -97,7 +97,8 @@ jobs:
             fi
 
             if [[ "$file_path" == *"workflows"* && "$file_path" == *.yml ]]; then
-              res_path=$(yq eval '.env.RES_PATH // ""' "$file_path" 2>/dev/null)
+              # res_path=$(yq eval '.env.RES_PATH // ""' "$file_path" 2>/dev/null)
+              res_path=""
 
               if [[ -n "$res_path" ]]; then
                 echo "File is a workflow file"
