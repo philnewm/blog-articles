@@ -28,14 +28,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Install yq
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y yq
+
       - name: Get latest file changes from ${{ github.repository}}/refs/heads/${{ github.ref_name }}
         # Warning will brake if commas (",") are used in filepaths
         id: latest-changes
         run: |
           # INFO repo events endpoint is not meant for realtime usage - see https://docs.github.com/en/rest/activity/events?apiVersion=2022-11-28#list-repository-events
           # read HEAD_SHA BASE_SHA < <(gh api repos/philnewm/blog-articles/events --jq '[ .[] | select(.type=="PushEvent" and .payload.ref == "refs/heads/${{ github.ref_name }}") ][0] | [.payload.head, .payload.before] | join(" ")')
-
-          set -x
 
           LATEST_COMMIT_SHA=$(gh api repos/philnewm/blog-articles/commits?sha=draft --jq '.[0].sha')
           LATEST_PUSH_LATEST_COMMIT_SHA=${{ vars.LATEST_PUSH_COMMIT_SHA }}
@@ -97,8 +100,7 @@ jobs:
             fi
 
             if [[ "$file_path" == *"workflows"* && "$file_path" == *.yml ]]; then
-              # res_path=$(yq eval '.env.RES_PATH // ""' "$file_path" 2>/dev/null)
-              res_path=""
+              res_path=$(yq eval '.env.RES_PATH // ""' "$file_path" 2>/dev/null)
 
               if [[ -n "$res_path" ]]; then
                 echo "File is a workflow file"
@@ -150,6 +152,8 @@ jobs:
         run: |
           echo "Latest push commit sha: ${{ steps.latest-changes.outputs.latest_commit_sha }}"
           gh variable set LATEST_PUSH_COMMIT_SHA --repo ${{ github.repository}} --body ${{ steps.latest-changes.outputs.latest_commit_sha }}
+        env:
+          GH_TOKEN: ${{ secrets.PAGES_PAT }}
 
   # get-front-matter:
   #   uses: philnewm/blog-articles/.github/workflows/front_matter_processor.yml
