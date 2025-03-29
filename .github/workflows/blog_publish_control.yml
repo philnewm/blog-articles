@@ -19,6 +19,7 @@ on:
 
 env:
   GH_TOKEN: ${{ github.token }}
+  YQ_VERSION: "v4.44.3"
 
 permissions:
   contents: read
@@ -30,15 +31,15 @@ jobs:
     steps:
       - name: Install yq
         run: |
-          sudo apt-get update
-          sudo apt-get install -y yq
+          sudo wget https://github.com/mikefarah/yq/releases/download/${{ env.YQ_VERSION }}/yq_linux_amd64 -O /usr/bin/yq && sudo chmod +x /usr/bin/yq
 
       - name: Get latest file changes from ${{ github.repository}}/refs/heads/${{ github.ref_name }}
         # Warning will brake if commas (",") are used in filepaths
         id: latest-changes
         run: |
           # INFO repo events endpoint is not meant for realtime usage - see https://docs.github.com/en/rest/activity/events?apiVersion=2022-11-28#list-repository-events
-          # read HEAD_SHA BASE_SHA < <(gh api repos/philnewm/blog-articles/events --jq '[ .[] | select(.type=="PushEvent" and .payload.ref == "refs/heads/${{ github.ref_name }}") ][0] | [.payload.head, .payload.before] | join(" ")')
+
+          set -e -x
 
           LATEST_COMMIT_SHA=$(gh api repos/philnewm/blog-articles/commits?sha=draft --jq '.[0].sha')
           LATEST_PUSH_LATEST_COMMIT_SHA=${{ vars.LATEST_PUSH_COMMIT_SHA }}
