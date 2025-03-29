@@ -33,6 +33,10 @@ jobs:
         run: |
           sudo wget https://github.com/mikefarah/yq/releases/download/${{ env.YQ_VERSION }}/yq_linux_amd64 -O /usr/bin/yq && sudo chmod +x /usr/bin/yq
 
+      - name: Verify yq version
+        run: |
+          yq --version
+
       - name: Get latest file changes from ${{ github.repository}}/refs/heads/${{ github.ref_name }}
         # Warning will brake if commas (",") are used in filepaths
         id: latest-changes
