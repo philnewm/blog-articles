@@ -35,6 +35,8 @@ jobs:
           # INFO repo events endpoint is not meant for realtime usage - see https://docs.github.com/en/rest/activity/events?apiVersion=2022-11-28#list-repository-events
           # read HEAD_SHA BASE_SHA < <(gh api repos/philnewm/blog-articles/events --jq '[ .[] | select(.type=="PushEvent" and .payload.ref == "refs/heads/${{ github.ref_name }}") ][0] | [.payload.head, .payload.before] | join(" ")')
 
+          set -x
+
           LATEST_COMMIT_SHA=$(gh api repos/philnewm/blog-articles/commits?sha=draft --jq '.[0].sha')
           LATEST_PUSH_LATEST_COMMIT_SHA=${{ vars.LATEST_PUSH_COMMIT_SHA }}
 
