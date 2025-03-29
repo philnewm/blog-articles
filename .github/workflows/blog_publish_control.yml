@@ -33,7 +33,10 @@ jobs:
         id: latest-changes
         run: |
           # INFO Get commit hashes from two latest pushes
-          read HEAD_SHA BASE_SHA < <(gh api repos/philnewm/blog-articles/events --jq '[ .[] | select(.type=="PushEvent" and .payload.ref == "refs/heads/draft") ][0] | [.payload.head, .payload.before] | join(" ")')
+          read HEAD_SHA BASE_SHA < <(gh api repos/philnewm/blog-articles/events --jq '[ .[] | select(.type=="PushEvent" and .payload.ref == "refs/heads/${{ github.ref_name }}") ][0] | [.payload.head, .payload.before] | join(" ")')
+
+          echo "HEAD SHA: $HEAD_SHA"
+          echo "BASE SHA: $BASE_SHA"
 
           EXCLUDE_LIST=("README.md" "TODO.md" ".obsidian/")
           CHANGES=$(gh api repos/philnewm/blog-articles/compare/$BASE_SHA...$HEAD_SHA)
@@ -59,7 +62,10 @@ jobs:
             local file_path="$1"
             local file_status="$2"
 
+            echo "Classifying file: $file_path with status: $file_status"
+
             if [[ "$file_path" == *.md ]]; then
+              echo "File is a markdown file"
               case "$file_status" in
                 "added") ADDED_FILES+=("$file_path") ;;
                 "modified") MODIFIED_FILES+=("$file_path") ;;
@@ -68,6 +74,7 @@ jobs:
             fi
 
             if [[ "$file_path" == *"/resources"* ]]; then
+              echo "File is in resources folder"
               stripped_path="${file_path%%/resources*}"
               # WARNING breaks if paths doesn't exist anymore
               md_files=$(gh api repos/philnewm/blog-articles/contents/"$stripped_path"?ref=${{ github.ref_name }} | jq -r '.[] | select(.name | endswith(".md")) | .name')
@@ -87,6 +94,7 @@ jobs:
               res_path=$(yq eval '.env.RES_PATH // ""' "$file_path" 2>/dev/null)
 
               if [[ -n "$res_path" ]]; then
+                echo "File is a workflow file"
                 stripped_path="${res_path///resources/}"
                 # WARNING breaks if paths doesn't exist anymore
                 md_files=$(gh api repos/philnewm/blog-articles/contents/"$stripped_path"?ref=${{ github.ref_name }} | jq -r '.[] | select(.name | endswith(".md")) | .name')
