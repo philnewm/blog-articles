@@ -28,6 +28,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Show shas
+        run: |
+          echo "before: ${{ github.event.before }}"
+          echo "after: ${{ github.event.after }}"
+
       - name: Get latest file changes from ${{ github.repository}}/refs/heads/${{ github.ref_name }}
         # Warning will brake if commas (",") are used in filepaths
         id: latest-changes
