@@ -17,7 +17,7 @@ permissions:
   contents: read
   
 env:
-  RES_PATH: "molecule_getting_started/resources"
+  RES_PATH: "molecule_getting_started/resources" # also used for update identification
   # TODO change to publish
   BRANCH_REF: "draft"
   PYTHON_VERSION: "3.12"

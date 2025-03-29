@@ -11,6 +11,7 @@ on:
     paths:
       - "**/resources/**"
       - "**.md"
+      - "**/workflows/**"
       - "!TODO.md"
       - "!README.md"
       - "!.gitignore"
@@ -29,29 +30,100 @@ jobs:
     steps:
       - name: Get latest file changes from ${{ github.repository}}/refs/heads/${{ github.ref_name }}
         # Warning will brake if commas (",") are used in filepaths
-        # TODO test if this works for multiple commits as well
         id: latest-changes
         run: |
           # INFO Get commit hashes from two latest pushes
-          read HEAD_SHA BASE_SHA < <(gh api repos/${{ github.repository}}/events --jq '[ .[] | select(.type=="PushEvent" and .payload.ref == "refs/heads/${{ github.ref_name }}") ][0] | [.payload.head, .payload.before] | join(" ")')
+          read HEAD_SHA BASE_SHA < <(gh api repos/philnewm/blog-articles/events --jq '[ .[] | select(.type=="PushEvent" and .payload.ref == "refs/heads/draft") ][0] | [.payload.head, .payload.before] | join(" ")')
 
-          echo "Comparing changes between $BASE_SHA and $HEAD_SHA"
+          EXCLUDE_LIST=("README.md" "TODO.md" ".obsidian/")
+          CHANGES=$(gh api repos/philnewm/blog-articles/compare/$BASE_SHA...$HEAD_SHA)
+          EXCLUDE_JSON=$(printf '%s\n' "${EXCLUDE_LIST[@]}" | jq -R . | jq -s .)
+          FILTERED_CHANGES=$(echo "$CHANGES" | jq --argjson exclude_list "$EXCLUDE_JSON" '
+            def is_excluded($filename):
+              reduce $exclude_list[] as $excl (true; . and ($filename | contains($excl) | not));
 
-          CHANGES=$(gh api repos/philnewm/blog-articles/compare/$BASE_SHA...$HEAD_SHA --jq '
             {
-              added:   [ .files[] | select(.status=="added") | .filename ],
-              edited:  [ .files[] | select(.status=="modified") | .filename ],
-              removed: [ .files[] | select(.status=="removed") | .filename ]
-            }')
+              added: [ .files[] | select(.status == "added" and (is_excluded(.filename))) | .filename ],
+              modified: [ .files[] | select(.status == "modified" and (is_excluded(.filename))) | .filename ],
+              removed: [ .files[] | select(.status == "removed" and (is_excluded(.filename))) | .filename ]
+            }
+          ')
 
-          # INFO compact (-c) jq for single line strings
-          ADDED_FILES=$(echo "$CHANGES" | jq -c '.added | join(",")')
-          EDITED_FILES=$(echo "$CHANGES" | jq -c '.edited | join(",")')
-          REMOVED_FILES=$(echo "$CHANGES" | jq -c '.removed | join(",")')
+          echo "Filtered changes: $FILTERED_CHANGES"
 
-          echo "added_files=$ADDED_FILES" >> $GITHUB_OUTPUT
-          echo "edited_files=$EDITED_FILES" >> $GITHUB_OUTPUT
-          echo "removed_files=$REMOVED_FILES" >> $GITHUB_OUTPUT
+          ADDED_FILES=()
+          MODIFIED_FILES=()
+          REMOVED_FILES=()
+
+          classify_file() {
+            local file_path="$1"
+            local file_status="$2"
+
+            if [[ "$file_path" == *.md ]]; then
+              case "$file_status" in
+                "added") ADDED_FILES+=("$file_path") ;;
+                "modified") MODIFIED_FILES+=("$file_path") ;;
+                "removed") REMOVED_FILES+=("$file_path") ;;
+              esac
+            fi
+
+            if [[ "$file_path" == *"/resources"* ]]; then
+              stripped_path="${file_path%%/resources*}"
+              # WARNING breaks if paths doesn't exist anymore
+              md_files=$(gh api repos/philnewm/blog-articles/contents/"$stripped_path"?ref=${{ github.ref_name }} | jq -r '.[] | select(.name | endswith(".md")) | .name')
+
+              echo $file_path
+
+              for md_file in $md_files; do
+                case "$file_status" in
+                  "added") ADDED_FILES+=("$stripped_path/$md_file") ;;
+                  "modified") MODIFIED_FILES+=("$stripped_path/$md_file") ;;
+                  "removed") REMOVED_FILES+=("$stripped_path/$md_file") ;;
+                esac
+              done
+            fi
+
+            if [[ "$file_path" == *"workflows"* && "$file_path" == *.yml ]]; then
+              res_path=$(yq eval '.env.RES_PATH // ""' "$file_path" 2>/dev/null)
+
+              if [[ -n "$res_path" ]]; then
+                stripped_path="${res_path///resources/}"
+                # WARNING breaks if paths doesn't exist anymore
+                md_files=$(gh api repos/philnewm/blog-articles/contents/"$stripped_path"?ref=${{ github.ref_name }} | jq -r '.[] | select(.name | endswith(".md")) | .name')
+
+                for md_file in $md_files; do
+                  case "$file_status" in
+                    "added") ADDED_FILES+=("$stripped_path/$md_file") ;;
+                    "modified") MODIFIED_FILES+=("$stripped_path/$md_file") ;;
+                    "removed") REMOVED_FILES+=("$stripped_path/$md_file") ;;
+                  esac
+                done
+              fi
+            fi
+          }
+
+          # INFO Iterate over all changed files and classify them
+          for file in $(echo "$FILTERED_CHANGES" | jq -r '.added[]'); do
+            classify_file "$file" "added"
+          done
+          for file in $(echo "$FILTERED_CHANGES" | jq -r '.modified[]'); do
+            classify_file "$file" "modified"
+          done
+          for file in $(echo "$FILTERED_CHANGES" | jq -r '.removed[]'); do
+            classify_file "$file" "removed"
+          done
+
+          ADDED_FILES_STR=$(IFS=,; echo "${ADDED_FILES[*]}")
+          MODIFIED_FILES_STR=$(IFS=,; echo "${MODIFIED_FILES[*]}")
+          REMOVED_FILES_STR=$(IFS=,; echo "${REMOVED_FILES[*]}")
+
+          echo "added_files=$ADDED_FILES_STR" >> $GITHUB_OUTPUT
+          echo "edited_files=$MODIFIED_FILES_STR" >> $GITHUB_OUTPUT
+          echo "removed_files=$REMOVED_FILES_STR" >> $GITHUB_OUTPUT
+
+          echo "Added files: $ADDED_FILES_STR"
+          echo "Edited files: $MODIFIED_FILES_STR"
+          echo "Removed files: $REMOVED_FILES_STR"
 
       - name: Debug file changes sorted
         run: |
