@@ -105,6 +105,7 @@ jobs:
             fi
 
             if [[ "$file_path" == *"workflows"* && "$file_path" == *.yml ]]; then
+              echo "File is a workflow file"
               res_path=$(yq eval '.env.RES_PATH // ""' "$file_path" 2>/dev/null)
               echo "res_path: $res_path"
               echo "yq applied"
