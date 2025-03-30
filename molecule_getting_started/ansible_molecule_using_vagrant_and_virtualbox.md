@@ -78,8 +78,7 @@ ln: true
 ```
 
 > [!tip]- docker python packages
-> Installing the docker python package is only necessary due to a bug [#32540](https://github.com/ansible/molecule/issues/2540) in molecule plugins.
-> A fix for this one is already merged, see [#166](https://github.com/ansible-community/molecule-plugins/issues/166) but no new release happened so far.
+> In case you are using a version < [v23.6.0](https://github.com/ansible-community/molecule-plugins/releases/tag/v23.6.0) you might need to install the docker python package due to a bug [#32540](https://github.com/ansible/molecule/issues/2540) in molecule plugins.
 
 Now you can run `upgrade pip` and install the requirements.
 
