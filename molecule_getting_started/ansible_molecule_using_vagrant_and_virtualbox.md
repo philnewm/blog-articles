@@ -25,7 +25,9 @@ draft: false
 This article is intended as a guide to set up Ansible Molecule for testing Ansible roles by running them against virtual machines. These virtual machines will be controlled by Vagrant using VirtualBox as provider.
 The code in this guide was developed and tested on AlmaLinux9 and Ubuntu22.04 for the software versions mentioned in [Requirements](#requirements).
 
-All static files used throughout this guide can be found [here](https://github.com/philnewm/blog-articles/tree/draft/ansible/molecule_getting_started/resources)
+All static files used throughout this guide can be found [here](https://github.com/philnewm/blog-articles/tree/draft/molecule_getting_started/resources).
+
+<!-- more -->
 
 ## Requirements
 

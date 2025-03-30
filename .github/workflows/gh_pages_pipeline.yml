@@ -4,6 +4,11 @@ name: Github Pages Pipeline
 
 on:
   workflow_dispatch:
+    inputs:
+      file_path:
+        type: string
+        description: 'File name to process'
+        required: true
   workflow_call:
 
 permissions:
@@ -19,81 +24,80 @@ env:
 jobs:
   collect-markdown-files:
     runs-on: ubuntu-latest
-    outputs:
-      files_added: ${{ steps.compare-files.outputs.files_added }}
-      files_removed: ${{ steps.compare-files.outputs.files_removed }}
+    # outputs:
+    #   files_added: ${{ steps.compare-files.outputs.files_added }}
+    #   files_removed: ${{ steps.compare-files.outputs.files_removed }}
 
     steps:
       # TODO cleanup this query mess
-      - name: Get markdown files from ${{ github.repository}}
-        id: get-source-md-files
-        # TODO change to publish branch when implemented
-        run: |
-          IGNORED_FILES_JSON=$(jq -R -c 'split(",")' <<< "${{ vars.IGNORED_FILES }}")
+      # - name: Get markdown files from ${{ github.repository}}
+      #   id: get-source-md-files
+      #   # TODO change to publish branch when implemented
+      #   run: |
+      #     IGNORED_FILES_JSON=$(jq -R -c 'split(",")' <<< "${{ vars.IGNORED_FILES }}")
 
-          md_files_json=$(gh api repos/${{ github.repository }}/git/trees/${{ github.ref_name }}?recursive=1 --jq '[.tree[].path | select(endswith(".md"))]')
-          md_files_json=$(echo $md_files_json | jq --argjson ignored "$IGNORED_FILES_JSON" 'map(select(. as $file | $ignored | index($file) | not))')
-          md_files_str=$(echo $md_files_json | jq -c)
+      #     md_files_json=$(gh api repos/${{ github.repository }}/git/trees/${{ github.ref_name }}?recursive=1 --jq '[.tree[].path | select(endswith(".md"))]')
+      #     md_files_json=$(echo $md_files_json | jq --argjson ignored "$IGNORED_FILES_JSON" 'map(select(. as $file | $ignored | index($file) | not))')
+      #     md_files_str=$(echo $md_files_json | jq -c)
 
-          echo "source_files=$md_files_str" >> $GITHUB_OUTPUT
-        env:
-          GH_TOKEN: ${{ github.token }}
+      #     echo "source_files=$md_files_str" >> $GITHUB_OUTPUT
+      #   env:
+      #     GH_TOKEN: ${{ github.token }}
 
-      - name: Get markdown files from ${{ env.TARGET_REPO}}
-        id: get-target-md-files
-        run: |
-          IGNORED_FILES_JSON=$(jq -R -c 'split(",")' <<< "${{ vars.IGNORED_FILES_TARGET }}")
-          md_files_json=$(gh api repos/philnewm/${{ env.TARGET_REPO }}/git/trees/main?recursive=1 --jq '[.tree[].path | select(endswith(".md"))]')
-          md_files_json=$(echo $md_files_json | jq --argjson ignored "$IGNORED_FILES_JSON" 'map(select(. as $file | $ignored | index($file) | not))')
-          md_files_json=$(echo $md_files_json | jq 'map(sub("^${{ env.TARGET_PREFIX }}"; ""))')
-          md_files_str=$(echo $md_files_json | jq -c)
+      # - name: Get markdown files from ${{ env.TARGET_REPO}}
+      #   id: get-target-md-files
+      #   run: |
+      #     IGNORED_FILES_JSON=$(jq -R -c 'split(",")' <<< "${{ vars.IGNORED_FILES_TARGET }}")
+      #     md_files_json=$(gh api repos/philnewm/${{ env.TARGET_REPO }}/git/trees/main?recursive=1 --jq '[.tree[].path | select(endswith(".md"))]')
+      #     md_files_json=$(echo $md_files_json | jq --argjson ignored "$IGNORED_FILES_JSON" 'map(select(. as $file | $ignored | index($file) | not))')
+      #     md_files_json=$(echo $md_files_json | jq 'map(sub("^${{ env.TARGET_PREFIX }}"; ""))')
+      #     md_files_str=$(echo $md_files_json | jq -c)
 
-          echo "target_files=$md_files_str" >> $GITHUB_OUTPUT
-        env:
-          GH_TOKEN: ${{ github.token }}
+      #     echo "target_files=$md_files_str" >> $GITHUB_OUTPUT
+      #   env:
+      #     GH_TOKEN: ${{ github.token }}
 
-      - name: Debug output
-        run: |
-          echo "source_files=$(echo '${{ steps.get-source-md-files.outputs.source_files }}' | jq -r)"
-          echo "target_files=$(echo '${{ steps.get-target-md-files.outputs.target_files }}' | jq -r)"
+      # - name: Debug output
+      #   run: |
+      #     echo "source_files=$(echo '${{ steps.get-source-md-files.outputs.source_files }}' | jq -r)"
+      #     echo "target_files=$(echo '${{ steps.get-target-md-files.outputs.target_files }}' | jq -r)"
 
-      - name: Compare files
-        id: compare-files
-        run: |
-          source_files=$(echo '${{ steps.get-source-md-files.outputs.source_files }}' | jq -r)
-          target_files=$(echo '${{ steps.get-target-md-files.outputs.target_files }}' | jq -r)
+      # - name: Compare files
+      #   id: compare-files
+      #   run: |
+      #     source_files=$(echo '${{ steps.get-source-md-files.outputs.source_files }}' | jq -r)
+      #     target_files=$(echo '${{ steps.get-target-md-files.outputs.target_files }}' | jq -r)
 
-          files_added=$(echo $source_files | jq -c)
-          files_removed=$(echo $source_files $target_files | jq -s -c '.[1] - .[0]')
+      #     files_added=$(echo $source_files | jq -c)
+      #     files_removed=$(echo $source_files $target_files | jq -s -c '.[1] - .[0]')
 
-          echo "files_added=$files_added" >> $GITHUB_OUTPUT
-          echo "files_removed=$files_removed" >> $GITHUB_OUTPUT
+      #     echo "files_added=$files_added" >> $GITHUB_OUTPUT
+      #     echo "files_removed=$files_removed" >> $GITHUB_OUTPUT
 
-          base_url="https://raw.githubusercontent.com/${{ github.repository }}/refs/heads/${{ github.ref_name }}/"
-          files_csv=$(echo "$files_added" | jq -r --arg base "$base_url" '[.[] | $base + .] | join(",")')
-          echo "files_csv=$files_csv" >> $GITHUB_OUTPUT
+      #     base_url="https://raw.githubusercontent.com/${{ github.repository }}/refs/heads/${{ github.ref_name }}/"
+      #     files_csv=$(echo "$files_added" | jq -r --arg base "$base_url" '[.[] | $base + .] | join(",")')
+      #     echo "files_csv=$files_csv" >> $GITHUB_OUTPUT
 
-      - name: Debug output
-        run: |
-          echo "added_files=$(echo '${{ steps.compare-files.outputs.files_added }}' | jq -r)"
-          echo "removed_files=$(echo '${{ steps.compare-files.outputs.files_removed }}' | jq -r)"
+      # - name: Debug output
+      #   run: |
+      #     echo "added_files=$(echo '${{ steps.compare-files.outputs.files_added }}' | jq -r)"
+      #     echo "removed_files=$(echo '${{ steps.compare-files.outputs.files_removed }}' | jq -r)"
 
-      - name: Show added files if any
-        if: ${{ steps.compare-files.outputs.files_added }}
-        run: |
-          echo "Markdown files to add: ${{ toJson(steps.compare-files.outputs.files_added) }}"
-          echo "CSV: ${{ steps.compare-files.outputs.files_csv }}"
+      # - name: Show added files if any
+      #   if: ${{ steps.compare-files.outputs.files_added }}
+      #   run: |
+      #     echo "Markdown files to add: ${{ toJson(steps.compare-files.outputs.files_added) }}"
+      #     echo "CSV: ${{ steps.compare-files.outputs.files_csv }}"
 
-      - name: Show removed files if any
-        if: ${{ steps.compare-files.outputs.files_removed }}
-        run: |
-          echo "Markdown files to remove: ${{ toJson(steps.compare-files.outputs.files_removed) }}"
+      # - name: Show removed files if any
+      #   if: ${{ steps.compare-files.outputs.files_removed }}
+      #   run: |
+      #     echo "Markdown files to remove: ${{ toJson(steps.compare-files.outputs.files_removed) }}"
 
       - name: Convert code
-        if: ${{ steps.compare-files.outputs.files_added }}
         uses: philnewm/markdown-conversion@main
         with:
-          markdown_file_urls: ${{ steps.compare-files.outputs.files_csv }}
+          markdown_file_urls: raw.githubusercontent.com/${{ github.repository }}/${{ github.ref_name }}${{ inputs.file_path }}
           output_dir_code: ${{ github.workspace }}/code
 
       - name: Upload gh_output
@@ -105,8 +109,8 @@ jobs:
 
 
   push-to-pages-repo:
-    needs:
-      - collect-markdown-files
+    # needs:
+    #   - collect-markdown-files
     if: ${{ needs.collect-markdown-files.outputs.files_added || needs.collect-markdown-files.outputs.files_removed }}
     # TODO put back in line after development
     # && github.event.workflow_run.head_branch == 'publish' }}
@@ -121,16 +125,16 @@ jobs:
           fetch-depth: 1
 
       - name: Get artifacts
-        if: ${{ needs.collect-markdown-files.outputs.files_added }}
+        # if: ${{ needs.collect-markdown-files.outputs.files_added }}
         uses: actions/download-artifact@v4
         with:
           name: code_output
           path: tmp
 
       - name: Move artifact to target directory
-        if: ${{ needs.collect-markdown-files.outputs.files_added }}
-        env:
-          FILE_PATHS_ADD: ${{ needs.collect-markdown-files.outputs.files_added }}
+        # if: ${{ needs.collect-markdown-files.outputs.files_added }}
+        # env:
+        #   FILE_PATHS_ADD: ${{ needs.collect-markdown-files.outputs.files_added }}
         run: |
           mkdir -p docs/posts
 
