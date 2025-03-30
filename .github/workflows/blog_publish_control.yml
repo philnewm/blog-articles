@@ -138,6 +138,9 @@ jobs:
             classify_file "$file" "removed"
           done
 
+          # INFO cleanup potentially downloaded files
+          # rm -Rf *
+
           ADDED_FILES_STR=$(IFS=,; echo "${ADDED_FILES[*]}")
           MODIFIED_FILES_STR=$(IFS=,; echo "${MODIFIED_FILES[*]}")
           REMOVED_FILES_STR=$(IFS=,; echo "${REMOVED_FILES[*]}")
@@ -163,8 +166,14 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.PAGES_PAT }}
 
-  # get-front-matter:
-  #   uses: philnewm/blog-articles/.github/workflows/front_matter_processor.yml
+  run-required-ci:
+    strategy:
+      fail-fast: false
+      matrix:
+        md_files: 
+    uses: philnewm/blog-articles/.github/workflows/front_matter_processor.yml
+    with:
+      markdown_file_path: ${{ steps.get-changed-md-files.outputs.added_files }}
 
   # run-ci:
   #   if: ${{ jobs.get-fron-matter.outputs.ci_file }}

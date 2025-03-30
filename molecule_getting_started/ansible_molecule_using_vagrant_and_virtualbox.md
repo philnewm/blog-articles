@@ -9,13 +9,12 @@ authors:
   - philipp
 date:
   created: 2025-03-20
-  updated: 2025-03-22
+  updated: 2025-03-30
 categories:
   - infrastructure
 ci: ansible_molecule_getting_started_ci
 devto: true
-gh_pages: true
-draft: true
+draft: false
 ---
 # Getting started with Molecule
 
@@ -322,7 +321,7 @@ Now you should be able to run `molecule verify` to have these tests run against 
 
 ---
 
-Now you got a basic setup to implement an Ansible role and test it in an automated and easy to use way against VirtualBox virtual machines.
+Well done, at this point you should have a basic setup to implement an Ansible role and test it in an automated and easy to use way against VirtualBox virtual machines.
 This kind of setup is also quite extensible with additional logic and convenience features as I'll show you in the following articles of this series.
 
-@@ TODO research what other put here in the end
+Thanks for reading and stay tuned.
