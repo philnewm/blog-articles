@@ -5,9 +5,9 @@ name: Github Pages Pipeline
 on:
   workflow_dispatch:
     inputs:
-      file_path:
+      file_paths:
         type: string
-        description: 'File name to process'
+        description: 'File paths to process'
         required: true
   workflow_call:
 
@@ -19,7 +19,7 @@ env:
   URL: "raw.githubusercontent.com/${{ github.repository }}/${{ github.ref_name }}"
   TARGET_REPO: "philnewm.github.io"
   TARGET_BRANCH: "main"
-  TARGET_PREFIX: "site/docs/"
+  TARGET_PREFIX: "docs/posts/"
 
 jobs:
   collect-markdown-files:
@@ -94,24 +94,36 @@ jobs:
       #   run: |
       #     echo "Markdown files to remove: ${{ toJson(steps.compare-files.outputs.files_removed) }}"
 
-      - name: Convert code
-        uses: philnewm/markdown-conversion@main
-        with:
-          markdown_file_urls: raw.githubusercontent.com/${{ github.repository }}/${{ github.ref_name }}${{ inputs.file_path }}
-          output_dir_code: ${{ github.workspace }}/code
+      - name: Ingest Articles
+        id: ingest-articles
+        run: |
+          update_articles=$(IFS=',' read -ra files <<< "${{ inputs.file_paths }}"; printf "raw.githubusercontent.com/${{ github.repository }}/${{ github.ref_name }}/%s," "${files[@]}" | sed 's/,$//')
 
-      - name: Upload gh_output
-        uses: actions/upload-artifact@v4
-        with:
-          name: code_output
-          path: ${{ github.workspace }}/code/*
-          if-no-files-found: error
+          echo "articles_updated=$update_articles" >> $GITHUB_OUTPUT
+
+      - name: Debug output
+        run: |
+          echo "Updated files: ${{ steps.ingest-articles.outputs.articles_updated }}"
+
+      # - name: Convert code
+      #   uses: philnewm/markdown-conversion@main
+      #   with:
+      #     markdown_file_urls: ${{ steps.ingest-articles.outputs.articles_updated }}
+      #     output_dir_code: ${{ github.workspace }}/code
+
+      # - name: Upload gh_output
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: code_output
+      #     path: ${{ github.workspace }}/code/*
+      #     if-no-files-found: error
 
 
   push-to-pages-repo:
-    # needs:
-    #   - collect-markdown-files
-    if: ${{ needs.collect-markdown-files.outputs.files_added || needs.collect-markdown-files.outputs.files_removed }}
+    needs:
+      - collect-markdown-files
+    if: false
+    # if: ${{ needs.collect-markdown-files.outputs.files_added || needs.collect-markdown-files.outputs.files_removed }}
     # TODO put back in line after development
     # && github.event.workflow_run.head_branch == 'publish' }}
     runs-on: ubuntu-latest
