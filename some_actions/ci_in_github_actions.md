@@ -1,4 +1,7 @@
 ---
+date:
+  created: 2025-04-04
+  updated: 2025-04-04
 ---
 # Using Github actions for fully automated CI
 
