@@ -119,10 +119,10 @@ jobs:
         run: |
           echo "Updated files: ${{ steps.ingest-articles.outputs.articles_updated }}"
           echo "Updated files JSON:"
-          echo '${{ steps.ingest-articles.outputs.articles_updated_json }}' | jq .''
+          echo '${{ steps.ingest-articles.outputs.articles_updated_json }}' | jq .
 
           echo "Removed files JSON:"
-          echo '${{ steps.ingest-articles.outputs.articles_remove_json }} | jq -r .''
+          echo '${{ steps.ingest-articles.outputs.articles_remove_json }}' | jq -r .
 
       - name: Convert code
         if: ${{ inputs.article_paths_added }}
