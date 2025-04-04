@@ -118,8 +118,8 @@ jobs:
       - name: Debug output
         run: |
           echo "Updated files: ${{ steps.ingest-articles.outputs.articles_updated }}"
-          echo "Updated files JSON: ${{ toJson(steps.ingest-articles.outputs.articles_updated_json) }}"
-          echo "Removed files JSON: ${{ toJson(steps.ingest-articles.outputs.articles_remove_json) }}"
+          echo "Updated files JSON: ${{ fromJson(steps.ingest-articles.outputs.articles_updated_json) }}"
+          echo "Removed files JSON: ${{ fromJson(steps.ingest-articles.outputs.articles_remove_json) }}"
 
       - name: Convert code
         if: ${{ inputs.article_paths_added }}
