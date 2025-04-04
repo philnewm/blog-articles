@@ -35,7 +35,7 @@ jobs:
     outputs:
       articles_updated: ${{ steps.ingest-articles.outputs.articles_updated }}
       articles_updated_json: ${{ steps.ingest-articles.outputs.articles_updated_json }}
-      articles_remove_json: ${{ steps.ingest-articles.outputs.articles_remove_json }}
+      articles_removed_json: ${{ steps.ingest-articles.outputs.articles_removed_json }}
 
     steps:
       # TODO cleanup this query mess
@@ -106,21 +106,21 @@ jobs:
       - name: Ingest Articles
         id: ingest-articles
         run: |
-          update_articles=$(IFS=',' read -ra files <<< "${{ inputs.article_paths_added }}"; printf "raw.githubusercontent.com/${{ github.repository }}/${{ github.ref_name }}/%s," "${files[@]}" | sed 's/,$//')
+          update_articles=$(IFS=',' read -ra files <<< "${{ inputs.article_paths_added }}"; printf "https://raw.githubusercontent.com/${{ github.repository }}/${{ github.ref_name }}/%s," "${files[@]}" | sed 's/,$//')
 
-          update_articles_json=$(echo "${{ inputs.article_paths_added }}" | jq -Rc 'split(",") | map("raw.githubusercontent.com/${{ github.repository }}/${{ github.ref_name }}/" + . )')
-          remove_articles_json=$(echo "${{ inputs.article_paths_removed }}" | jq -Rc 'split(",") | map("raw.githubusercontent.com/${{ github.repository }}/${{ github.ref_name }}/" + . )')
+          update_articles_json=$(echo "${{ inputs.article_paths_added }}" | jq -Rc 'split(",")')
+          remove_articles_json=$(echo "${{ inputs.article_paths_removed }}" | jq -Rc 'split(",")')
 
           echo "articles_updated=$update_articles" >> $GITHUB_OUTPUT
           echo "articles_updated_json=$update_articles_json" >> $GITHUB_OUTPUT
-          echo "articles_remove_json=$remove_articles_json" >> $GITHUB_OUTPUT
+          echo "articles_removed_json=$remove_articles_json" >> $GITHUB_OUTPUT
 
       - name: Debug output
         run: |
-          echo "Updated files: ${{ steps.ingest-articles.outputs.articles_updated }}"
+          echo "Updated files CSV:"
+          echo "${{ steps.ingest-articles.outputs.articles_updated }}"
           echo "Updated files JSON:"
-          echo '${{ steps.ingest-articles.outputs.articles_updated_json }}' | jq .
-
+          echo '${{ steps.ingest-articles.outputs.articles_updated_json }}' | jq -r .
           echo "Removed files JSON:"
           echo '${{ steps.ingest-articles.outputs.articles_remove_json }}' | jq -r .
 
@@ -167,7 +167,7 @@ jobs:
       - name: Move artifact to target directory
         if: ${{ inputs.article_paths_added }}
         env:
-          FILE_PATHS_ADD: ${{ needs.collect-markdown-files.outputs.articles_updated }}
+          FILE_PATHS_ADD: ${{ needs.collect-markdown-files.outputs.articles_updated_json }}
         run: |
           mkdir -p docs/posts
 
@@ -185,7 +185,7 @@ jobs:
       - name: Remove obsolete files
         if: ${{ inputs.article_paths_removed }}
         env:
-          FILE_PATHS_DEL: ${{ needs.collect-markdown-files.outputs.articles_remove }}
+          FILE_PATHS_DEL: ${{ needs.collect-markdown-files.outputs.articles_removed_json }}
         run: |
           readarray -t file_array < <(echo '${{ env.FILE_PATHS_DEL }}' | jq -r '.[]')
           echo "Removing files: ${file_array[@]}"
