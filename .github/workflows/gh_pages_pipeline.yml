@@ -5,10 +5,18 @@ name: Github Pages Pipeline
 on:
   workflow_dispatch:
     inputs:
-      file_paths:
+      article_paths_added:
         type: string
         description: 'File paths to process'
-        required: true
+        required: false
+        default: ""
+      article_paths_removed:
+        type: string
+        description: 'File paths to remove'
+        required: false
+        default: ""
+
+        
   workflow_call:
 
 permissions:
@@ -24,9 +32,10 @@ env:
 jobs:
   collect-markdown-files:
     runs-on: ubuntu-latest
-    # outputs:
-    #   files_added: ${{ steps.compare-files.outputs.files_added }}
-    #   files_removed: ${{ steps.compare-files.outputs.files_removed }}
+    outputs:
+      articles_updated: ${{ steps.ingest-articles.outputs.articles_updated }}
+      articles_updated_json: ${{ steps.ingest-articles.outputs.articles_updated_json }}
+      articles_remove_json: ${{ steps.ingest-articles.outputs.articles_remove_json }}
 
     steps:
       # TODO cleanup this query mess
@@ -97,33 +106,42 @@ jobs:
       - name: Ingest Articles
         id: ingest-articles
         run: |
-          update_articles=$(IFS=',' read -ra files <<< "${{ inputs.file_paths }}"; printf "raw.githubusercontent.com/${{ github.repository }}/${{ github.ref_name }}/%s," "${files[@]}" | sed 's/,$//')
+          update_articles=$(IFS=',' read -ra files <<< "${{ inputs.article_paths_added }}"; printf "raw.githubusercontent.com/${{ github.repository }}/${{ github.ref_name }}/%s," "${files[@]}" | sed 's/,$//')
+
+          update_articles_json=$(echo "${{ inputs.article_paths_added }}" | jq -R 'split(",") | map("raw.githubusercontent.com/${{ github.repository }}/${{ github.ref_name }}/" + . )')
+          remove_articles_json=$(echo "${{ inputs.article_paths_removed }}" | jq -R 'split(",") | map("raw.githubusercontent.com/${{ github.repository }}/${{ github.ref_name }}/" + . )')
 
           echo "articles_updated=$update_articles" >> $GITHUB_OUTPUT
+          echo "articles_updated_json=$remove_articles_json" >> $GITHUB_OUTPUT
+          echo "articles_remove_json=$remove_articles_json" >> $GITHUB_OUTPUT
 
       - name: Debug output
         run: |
           echo "Updated files: ${{ steps.ingest-articles.outputs.articles_updated }}"
+          echo "Updated files JSON: ${{ toJson(steps.ingest-articles.outputs.articles_updated_json) }}"
+          echo "Removed files JSON: ${{ toJson(steps.ingest-articles.outputs.articles_remove_json) }}"
 
-      # - name: Convert code
-      #   uses: philnewm/markdown-conversion@main
-      #   with:
-      #     markdown_file_urls: ${{ steps.ingest-articles.outputs.articles_updated }}
-      #     output_dir_code: ${{ github.workspace }}/code
+      - name: Convert code
+        if: ${{ inputs.article_paths_added }}
+        uses: philnewm/markdown-conversion@main
+        with:
+          markdown_file_urls: ${{ steps.ingest-articles.outputs.articles_updated }}
+          output_dir_code: ${{ github.workspace }}/code
 
-      # - name: Upload gh_output
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: code_output
-      #     path: ${{ github.workspace }}/code/*
-      #     if-no-files-found: error
+      - name: Upload gh_output
+        if: ${{ inputs.article_paths_added }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: code_output
+          path: ${{ github.workspace }}/code/*
+          if-no-files-found: error
 
 
   push-to-pages-repo:
     needs:
       - collect-markdown-files
     if: false
-    # if: ${{ needs.collect-markdown-files.outputs.files_added || needs.collect-markdown-files.outputs.files_removed }}
+    # ${{ inputs.article_paths_added || inputs.article_paths_removed }}
     # TODO put back in line after development
     # && github.event.workflow_run.head_branch == 'publish' }}
     runs-on: ubuntu-latest
@@ -137,16 +155,16 @@ jobs:
           fetch-depth: 1
 
       - name: Get artifacts
-        # if: ${{ needs.collect-markdown-files.outputs.files_added }}
+        if: ${{ inputs.article_paths_added }}
         uses: actions/download-artifact@v4
         with:
           name: code_output
           path: tmp
 
       - name: Move artifact to target directory
-        # if: ${{ needs.collect-markdown-files.outputs.files_added }}
-        # env:
-        #   FILE_PATHS_ADD: ${{ needs.collect-markdown-files.outputs.files_added }}
+        if: ${{ inputs.article_paths_added }}
+        env:
+          FILE_PATHS_ADD: ${{ needs.collect-markdown-files.outputs.articles_updated }}
         run: |
           mkdir -p docs/posts
 
@@ -162,9 +180,9 @@ jobs:
           rm -Rf ${{ github.workspace }}/tmp
 
       - name: Remove obsolete files
-        if: ${{ needs.collect-markdown-files.outputs.files_removed }}
+        if: ${{ inputs.article_paths_removed }}
         env:
-          FILE_PATHS_DEL: ${{ needs.collect-markdown-files.outputs.files_removed }}
+          FILE_PATHS_DEL: ${{ needs.collect-markdown-files.outputs.articles_remove }}
         run: |
           readarray -t file_array < <(echo '${{ env.FILE_PATHS_DEL }}' | jq -r '.[]')
           echo "Removing files: ${file_array[@]}"
@@ -176,7 +194,7 @@ jobs:
 
       - name: Verify Artifact Location
         run: |
-          echo "Files in site/docs:"
+          echo "Files in /docs/posts:"
           ls -l /${{ github.workspace }}/docs/posts
 
       - name: Push new file to pages repo
