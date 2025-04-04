@@ -108,8 +108,8 @@ jobs:
         run: |
           update_articles=$(IFS=',' read -ra files <<< "${{ inputs.article_paths_added }}"; printf "raw.githubusercontent.com/${{ github.repository }}/${{ github.ref_name }}/%s," "${files[@]}" | sed 's/,$//')
 
-          update_articles_json=$(echo "${{ inputs.article_paths_added }}" | jq -R 'split(",") | map("raw.githubusercontent.com/${{ github.repository }}/${{ github.ref_name }}/" + . )')
-          remove_articles_json=$(echo "${{ inputs.article_paths_removed }}" | jq -R 'split(",") | map("raw.githubusercontent.com/${{ github.repository }}/${{ github.ref_name }}/" + . )')
+          update_articles_json=$(echo "${{ inputs.article_paths_added }}" | jq -Rc 'split(",") | map("raw.githubusercontent.com/${{ github.repository }}/${{ github.ref_name }}/" + . )')
+          remove_articles_json=$(echo "${{ inputs.article_paths_removed }}" | jq -Rc 'split(",") | map("raw.githubusercontent.com/${{ github.repository }}/${{ github.ref_name }}/" + . )')
 
           echo "articles_updated=$update_articles" >> $GITHUB_OUTPUT
           echo "articles_updated_json=$update_articles_json" >> $GITHUB_OUTPUT
