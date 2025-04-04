@@ -143,8 +143,7 @@ jobs:
   push-to-pages-repo:
     needs:
       - collect-markdown-files
-    if: false
-    # ${{ inputs.article_paths_added || inputs.article_paths_removed }}
+    if: ${{ inputs.article_paths_added || inputs.article_paths_removed }}
     # TODO put back in line after development
     # && github.event.workflow_run.head_branch == 'publish' }}
     runs-on: ubuntu-latest
