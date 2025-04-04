@@ -1,3 +1,5 @@
+---
+---
 # Using Github actions for fully automated CI
 
 The molecule test suite works just fine in a terminal session as well so lets use this perk to enable automated CI through Github actions workflows.
