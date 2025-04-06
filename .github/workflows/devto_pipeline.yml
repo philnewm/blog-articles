@@ -22,12 +22,6 @@ on:
         required: false
         default: ""
 
-  workflow_run:
-      workflows:
-      - getting-started-ci
-      types:
-      - completed
-
 permissions:
   contents: read
 
