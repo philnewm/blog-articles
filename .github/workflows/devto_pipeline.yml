@@ -8,12 +8,12 @@ on:
     inputs:
       article_paths_added:
         type: string
-        description: 'File paths to process'
+        description: 'File paths to add'
         required: false
         default: ""
       article_paths_modified:
         type: string
-        description: 'File paths to process'
+        description: 'File paths to modify'
         required: false
         default: ""
       article_paths_removed:
