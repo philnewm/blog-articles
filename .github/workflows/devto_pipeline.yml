@@ -67,18 +67,10 @@ jobs:
           convert_articles=$(IFS=',' read -ra files <<< "$combined_paths"; printf "https://raw.githubusercontent.com/${{ github.repository }}/${{ github.ref_name }}/%s," "${files[@]}" | sed 's/,$//')
 
           add_articles_json=$(echo "${{ inputs.article_paths_added }}" | jq -Rc 'split(",")')
-          update_articles_json=$(echo "${{ inputs.article_paths_added }}" | jq -Rc 'split(",")')
+          update_articles_json=$(echo "${{ inputs.article_paths_modified }}" | jq -Rc 'split(",")')
           remove_articles_json=$(echo "${{ inputs.article_paths_removed }}" | jq -Rc 'split(",")')
 
-          articles_map=$(jq -nc \
-            --argjson add "$add_articles_json" \
-            --argjson update "$update_articles_json" \
-            --argjson remove "$remove_articles_json" \
-            '{
-              "added": $add,
-              "updated": $update,
-              "removed": $remove
-            }')
+          articles_map='{"added": $add, "updated": $update, "removed": $remove}'
 
           echo "convert_articles=$convert_articles" >> $GITHUB_OUTPUT
           echo "articles_map=$articles_map" >> $GITHUB_OUTPUT
