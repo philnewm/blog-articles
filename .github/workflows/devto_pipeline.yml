@@ -5,9 +5,22 @@ name: Dev.to Pipeline
 on:
   # TODO remove this trigger after debugging
   workflow_dispatch:
-  push:
-    branches:
-      - publish
+    inputs:
+      article_paths_added:
+        type: string
+        description: 'File paths to process'
+        required: false
+        default: ""
+      article_paths_modified:
+        type: string
+        description: 'File paths to process'
+        required: false
+        default: ""
+      article_paths_removed:
+        type: string
+        description: 'File paths to remove'
+        required: false
+        default: ""
 
   workflow_run:
       workflows:
@@ -33,18 +46,32 @@ jobs:
 
     steps:
       # TODO cleanup this query mess
+      # - name: Get markdown files from ${{ github.repository}}
+      #   id: get-source-md-files
+      #   run: |
+      #     IGNORED_FILES_JSON=$(jq -R -c 'split(",")' <<< "${{ vars.IGNORED_FILES }}")
+
+      #     md_files_json=$(gh api repos/${{ github.repository }}/git/trees/${{ github.ref_name }}?recursive=1 --jq '[.tree[].path | select(endswith(".md"))]')
+      #     md_files_json=$(echo $md_files_json | jq --argjson ignored "$IGNORED_FILES_JSON" 'map(select(. as $file | $ignored | index($file) | not))')
+      #     md_files_str=$(echo $md_files_json | jq -c)
+
+      #     echo "source_files=$md_files_str" >> $GITHUB_OUTPUT
+      #   env:
+      #     GH_TOKEN: ${{ github.token }}
+
       - name: Get markdown files from ${{ github.repository}}
         id: get-source-md-files
         run: |
-          IGNORED_FILES_JSON=$(jq -R -c 'split(",")' <<< "${{ vars.IGNORED_FILES }}")
+          convert_articles=$(IFS=',' read -ra files <<< "${{ inputs.article_paths_added }},${{ inputs.article_paths_modified }}"; printf "https://raw.githubusercontent.com/${{ github.repository }}/${{ github.ref_name }}/%s," "${files[@]}" | sed 's/,$//')
 
-          md_files_json=$(gh api repos/${{ github.repository }}/git/trees/${{ github.ref_name }}?recursive=1 --jq '[.tree[].path | select(endswith(".md"))]')
-          md_files_json=$(echo $md_files_json | jq --argjson ignored "$IGNORED_FILES_JSON" 'map(select(. as $file | $ignored | index($file) | not))')
-          md_files_str=$(echo $md_files_json | jq -c)
+          add_articles_json=$(echo "${{ inputs.article_paths_added }}" | jq -Rc 'split(",")')
+          update_articles_json=$(echo "${{ inputs.article_paths_added }}" | jq -Rc 'split(",")')
+          remove_articles_json=$(echo "${{ inputs.article_paths_removed }}" | jq -Rc 'split(",")')
 
-          echo "source_files=$md_files_str" >> $GITHUB_OUTPUT
-        env:
-          GH_TOKEN: ${{ github.token }}
+          echo "convert_articles=$convert_articles" >> $GITHUB_OUTPUT
+          echo "articles_added_json=$add_articles_json" >> $GITHUB_OUTPUT
+          echo "articles_updated_json=$update_articles_json" >> $GITHUB_OUTPUT
+          echo "articles_removed_json=$remove_articles_json" >> $GITHUB_OUTPUT
 
       - name: Get article canonical_urls from dev.to
         # TODO set to empty values as default  - defaults to null otherwise
@@ -57,11 +84,12 @@ jobs:
 
       - name: Debug output
         run: |
-          echo "source_files=$(echo '${{ steps.get-source-md-files.outputs.source_files }}' | jq -r)"
+          echo "source_files=$(echo '${{ steps.get-source-md-files.outputs.convert_articles }}' | jq -r)"
           echo "target_articles=$(echo '${{ steps.get-target-articles.outputs.articles_map }}' | jq -r)"
 
       - name: Compare files
         id: compare-articles
+        if : false
         env:
           SOURCE: "${{ steps.get-source-md-files.outputs.source_files }}"
           TARGET: "${{ steps.get-target-articles.outputs.articles_map }}"
@@ -109,10 +137,10 @@ jobs:
           echo "source_files= ${{ steps.compare-articles.outputs.files_csv }}"
 
       - name: Convert code and admonitions
-        if: ${{ steps.compare-articles.outputs.files_csv }}
+        if: ${{ inputs.article_paths_added || inputs.article_paths_modified }}
         uses: philnewm/markdown-conversion@main
         with:
-          markdown_file_urls: ${{ steps.compare-articles.outputs.files_csv }}
+          markdown_file_urls: ${{ steps.get-source-md-files.outputs.convert_articles }}
           output_dir_code: ${{ github.workspace }}/code
           output_dir_admonitions: ${{ github.workspace }}/admonitions
           code_parameters: "true"
@@ -127,6 +155,7 @@ jobs:
 
 
   push-to-devto:
+    if: false
     needs:
       - collect-articles
     if: ${{ needs.collect-articles.outputs.files_csv }}
