@@ -93,49 +93,48 @@ jobs:
           echo "source_files='${{ steps.get-source-md-files.outputs.convert_articles }}'"
           echo "target_articles=$(echo '${{ steps.get-source-md-files.outputs.articles_map }}' | jq -r)"
 
-      - name: Compare files
-        id: compare-articles
-        if : false
-        env:
-          SOURCE: "${{ steps.get-source-md-files.outputs.source_files }}"
-          TARGET: "${{ steps.get-target-articles.outputs.articles_map }}"
-          BASE_URL: "https://raw.githubusercontent.com/${{ github.repository }}/refs/heads/${{ github.ref_name }}/"
-        # INFO create a md file to article id map
-        # Depends on comparison between file paths from source repo and canonical_urls from dev.to query
-        # Filepath and article id present -> update existing article
-        # Filepath missing but id present -> articles was removed  so remove also on dev.to
-        # Filepath present but id missing -> create new article on dev.to
-        # INFO so far no checks if any changes actual happened
-        run: |
-          normalized_source_files=$(echo '${{ env.SOURCE }}' | jq -c 'map(sub("\\.md$"; ""))')
-          normalized_target_articles=$(echo '${{ env.TARGET }}' | jq -c 'to_entries | map({ key: ( .key | sub("^${{ env.TARGET_PREFIX }}/"; "") | sub("/$"; "") ), value: .value }) | from_entries')
+      # - name: Compare files
+      #   id: compare-articles
+      #   env:
+      #     SOURCE: "${{ steps.get-source-md-files.outputs.source_files }}"
+      #     TARGET: "${{ steps.get-target-articles.outputs.articles_map }}"
+      #     BASE_URL: "https://raw.githubusercontent.com/${{ github.repository }}/refs/heads/${{ github.ref_name }}/"
+      #   # INFO create a md file to article id map
+      #   # Depends on comparison between file paths from source repo and canonical_urls from dev.to query
+      #   # Filepath and article id present -> update existing article
+      #   # Filepath missing but id present -> articles was removed  so remove also on dev.to
+      #   # Filepath present but id missing -> create new article on dev.to
+      #   # INFO so far no checks if any changes actual happened
+      #   run: |
+      #     normalized_source_files=$(echo '${{ env.SOURCE }}' | jq -c 'map(sub("\\.md$"; ""))')
+      #     normalized_target_articles=$(echo '${{ env.TARGET }}' | jq -c 'to_entries | map({ key: ( .key | sub("^${{ env.TARGET_PREFIX }}/"; "") | sub("/$"; "") ), value: .value }) | from_entries')
 
-          echo "normalized_source_files: $normalized_source_files"
-          echo "normalized_target_articles: $normalized_target_articles"
+      #     echo "normalized_source_files: $normalized_source_files"
+      #     echo "normalized_target_articles: $normalized_target_articles"
 
-          md_to_id_mapping=$(jq -nc \
-                      --argjson src "$normalized_source_files" \
-                      --argjson tgt "$normalized_target_articles" \
-                      '
-                      reduce $src[] as $file ({}; 
-                      .[$file + ".md"] = if $tgt[$file] then $tgt[$file] else "" end
-                      )
-                      | reduce ($tgt | keys[]) as $article (.;
-                          if ($src | index($article)) == null then
-                          .[""] = $tgt[$article]
-                          else
-                          .
-                          end
-                      )
-                      ')
+      #     md_to_id_mapping=$(jq -nc \
+      #                 --argjson src "$normalized_source_files" \
+      #                 --argjson tgt "$normalized_target_articles" \
+      #                 '
+      #                 reduce $src[] as $file ({}; 
+      #                 .[$file + ".md"] = if $tgt[$file] then $tgt[$file] else "" end
+      #                 )
+      #                 | reduce ($tgt | keys[]) as $article (.;
+      #                     if ($src | index($article)) == null then
+      #                     .[""] = $tgt[$article]
+      #                     else
+      #                     .
+      #                     end
+      #                 )
+      #                 ')
 
-          echo "files_map=$md_to_id_mapping" >> $GITHUB_OUTPUT
+      #     echo "files_map=$md_to_id_mapping" >> $GITHUB_OUTPUT
 
-          files_csv=$(echo '${{ env.SOURCE }}' | jq -r --arg base "https://raw.githubusercontent.com/philnewm/blog-articles/refs/heads/pages-debug/" '[.[] | $base + .] | join(",")')
-          echo "files_csv=$files_csv"
+      #     files_csv=$(echo '${{ env.SOURCE }}' | jq -r --arg base "https://raw.githubusercontent.com/philnewm/blog-articles/refs/heads/pages-debug/" '[.[] | $base + .] | join(",")')
+      #     echo "files_csv=$files_csv"
 
-          files_csv=$(echo '${{ env.SOURCE }}' | jq -r --arg base "${{ env.BASE_URL }}" '[.[] | $base + .] | join(",")')
-          echo "files_csv=$files_csv" >> $GITHUB_OUTPUT
+      #     files_csv=$(echo '${{ env.SOURCE }}' | jq -r --arg base "${{ env.BASE_URL }}" '[.[] | $base + .] | join(",")')
+      #     echo "files_csv=$files_csv" >> $GITHUB_OUTPUT
 
       - name: Debug output
         run: |
