@@ -74,12 +74,11 @@ jobs:
             --argjson add "$add_articles_json" \
             --argjson update "$update_articles_json" \
             --argjson remove "$remove_articles_json" \
-            '
-            {
+            '{
               "added": $add,
               "updated": $update,
               "removed": $remove
-            }'
+            }')
 
           echo "convert_articles=$convert_articles" >> $GITHUB_OUTPUT
           echo "articles_map=$articles_map" >> $GITHUB_OUTPUT
