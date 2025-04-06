@@ -56,7 +56,15 @@ jobs:
       - name: Get markdown files from ${{ github.repository}}
         id: get-source-md-files
         run: |
-          convert_articles=$(IFS=',' read -ra files <<< "${{ inputs.article_paths_added }},${{ inputs.article_paths_modified }}"; printf "https://raw.githubusercontent.com/${{ github.repository }}/${{ github.ref_name }}/%s," "${files[@]}" | sed 's/,$//')
+          combined_paths="${{ inputs.article_paths_added }}"
+
+          if [[ -n "${{ inputs.article_paths_added }}" && -n "${{ inputs.article_paths_modified }}" ]]; then
+            combined_paths+=",${{ inputs.article_paths_modified }}"
+          elif [[ -z "${{ inputs.article_paths_added }}" ]]; then
+            combined_paths="${{ inputs.article_paths_modified }}"
+          fi
+
+          convert_articles=$(IFS=',' read -ra files <<< "$combined_paths"; printf "https://raw.githubusercontent.com/${{ github.repository }}/${{ github.ref_name }}/%s," "${files[@]}" | sed 's/,$//')
 
           add_articles_json=$(echo "${{ inputs.article_paths_added }}" | jq -Rc 'split(",")')
           update_articles_json=$(echo "${{ inputs.article_paths_added }}" | jq -Rc 'split(",")')
