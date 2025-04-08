@@ -137,7 +137,6 @@ jobs:
       #     echo "files_csv=$files_csv" >> $GITHUB_OUTPUT
 
       - name: Convert code and admonitions
-        if: ${{ inputs.article_paths_added || inputs.article_paths_modified }}
         uses: philnewm/markdown-conversion@main
         with:
           markdown_file_urls: ${{ steps.get-source-md-files.outputs.convert_articles }}
@@ -147,7 +146,6 @@ jobs:
 
       # INFO admonitions file includes code conversion - which is a design issue
       - name: Upload gh_output
-        if: ${{ inputs.article_paths_added || inputs.article_paths_modified }}
         uses: actions/upload-artifact@v4
         with:
           name: admonitions_output
@@ -164,7 +162,6 @@ jobs:
 
     steps:
       - name: Get artifacts
-        if: ${{ inputs.article_paths_added || inputs.article_paths_modified }}
         uses: actions/download-artifact@v4
         with:
           name: admonitions_output
