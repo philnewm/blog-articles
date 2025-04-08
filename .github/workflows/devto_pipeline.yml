@@ -35,7 +35,7 @@ jobs:
   collect-articles:
     runs-on: ubuntu-latest
     outputs:
-      files_map: ${{ steps.get-source-md-files.outputs.files_map }}
+      files_map: ${{ steps.get-source-md-files.outputs.convert_articles }}
       files_csv: ${{ steps.get-source-md-files.outputs.files_csv }}
 
     steps:
@@ -135,11 +135,6 @@ jobs:
 
       #     files_csv=$(echo '${{ env.SOURCE }}' | jq -r --arg base "${{ env.BASE_URL }}" '[.[] | $base + .] | join(",")')
       #     echo "files_csv=$files_csv" >> $GITHUB_OUTPUT
-
-      - name: Debug output
-        run: |
-          echo "files_map=$(echo '${{ steps.get-source-md-files.outputs.files_map }}' | jq -r)"
-          echo "source_files= ${{ steps.get-source-md-files.outputs.files_csv }}"
 
       - name: Convert code and admonitions
         if: ${{ inputs.article_paths_added || inputs.article_paths_modified }}
