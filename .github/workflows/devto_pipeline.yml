@@ -137,12 +137,27 @@ jobs:
       #     echo "files_csv=$files_csv" >> $GITHUB_OUTPUT
 
       - name: Convert code and admonitions
+        if: ${{ inputs.article_paths_added || inputs.article_paths_modified }}
         uses: philnewm/markdown-conversion@main
         with:
           markdown_file_urls: ${{ steps.get-source-md-files.outputs.convert_articles }}
           output_dir_code: ${{ github.workspace }}/code
           output_dir_admonitions: ${{ github.workspace }}/admonitions
           code_parameters: "true"
+
+      - name: Move articles to delete in palce
+        if: ${{ inputs.article_paths_removed }}
+        run: |
+          BASE_URL="https://raw.githubusercontent.com/${{ github.repository}}/${{ github.ref_name }}"
+          IFS=',' read -ra paths <<< "${{ inputs.article_paths_removed }}"
+
+          for path in "${paths[@]}"; do
+              full_url="${BASE_URL}/${path}"
+              echo "Downloading $full_url"
+              target="${{ github.workspace }}/admonitions/$(basename "$path")"
+
+              curl -s -o $target "$full_url"
+          done
 
       # INFO admonitions file includes code conversion - which is a design issue
       - name: Upload gh_output
@@ -162,6 +177,7 @@ jobs:
 
     steps:
       - name: Get artifacts
+        if: ${{ inputs.article_paths_added || inputs.article_paths_modified }}
         uses: actions/download-artifact@v4
         with:
           name: admonitions_output
