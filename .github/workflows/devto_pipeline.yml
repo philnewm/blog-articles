@@ -1,7 +1,7 @@
 ---
 
 name: Dev.to Pipeline
-
+# WARNING ther is currently the dummy accounts api token set up
 on:
   # TODO remove this trigger after debugging
   workflow_dispatch:
@@ -156,7 +156,9 @@ jobs:
               echo "Downloading $full_url"
               target="${{ github.workspace }}/admonitions/$(basename "$path")"
 
-              curl -s -o $target "$full_url"
+              echo "target: $target""
+
+              curl -s -o "$target" "$full_url"
           done
 
       # INFO admonitions file includes code conversion - which is a design issue
