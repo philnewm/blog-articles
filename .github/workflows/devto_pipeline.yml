@@ -35,8 +35,8 @@ jobs:
   collect-articles:
     runs-on: ubuntu-latest
     outputs:
-      files_map: ${{ steps.get-source-md-files.outputs.convert_articles }}
-      files_csv: ${{ steps.get-source-md-files.outputs.files_csv }}
+      files_map: ${{ steps.get-source-md-files.outputs.articles_map }}
+      files_csv: ${{ steps.get-source-md-files.outputs.convert_articles }}
 
     steps:
       # TODO cleanup this query mess
