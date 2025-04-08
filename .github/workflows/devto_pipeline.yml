@@ -147,6 +147,7 @@ jobs:
 
       # INFO admonitions file includes code conversion - which is a design issue
       - name: Upload gh_output
+        if: ${{ inputs.article_paths_added || inputs.article_paths_modified }}
         uses: actions/upload-artifact@v4
         with:
           name: admonitions_output
@@ -163,7 +164,7 @@ jobs:
 
     steps:
       - name: Get artifacts
-        if: ${{ needs.collect-articles.outputs.files_csv }}
+        if: ${{ inputs.article_paths_added || inputs.article_paths_modified }}
         uses: actions/download-artifact@v4
         with:
           name: admonitions_output
