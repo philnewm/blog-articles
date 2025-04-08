@@ -155,6 +155,7 @@ jobs:
               full_url="${BASE_URL}/${path}"
               echo "Downloading $full_url"
               target="${{ github.workspace }}/admonitions/$(basename "$path")"
+              mkdir -p "$(dirname "$target")"
 
               echo "target: $target"
 
