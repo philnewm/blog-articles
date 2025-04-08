@@ -156,7 +156,7 @@ jobs:
               echo "Downloading $full_url"
               target="${{ github.workspace }}/admonitions/$(basename "$path")"
 
-              echo "target: $target""
+              echo "target: $target"
 
               curl -s -o "$target" "$full_url"
           done
