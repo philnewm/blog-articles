@@ -180,7 +180,6 @@ jobs:
 
     steps:
       - name: Get artifacts
-        if: ${{ inputs.article_paths_added || inputs.article_paths_modified }}
         uses: actions/download-artifact@v4
         with:
           name: admonitions_output
