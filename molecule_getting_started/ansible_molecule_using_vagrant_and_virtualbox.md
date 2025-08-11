@@ -326,3 +326,20 @@ Well done, at this point you should have a basic setup to implement an Ansible r
 This kind of setup is also quite extensible with additional logic and convenience features as I'll show you in the following articles of this series.
 
 Thanks for reading and stay tuned.
+
+@@TODO check kernel module issue
+
+```
+sudo modprobe -r kvm_amd
+sudo modprobe -r kvm
+```
+
+@@TODO include VSCode config for auto complete
+```json
+{
+    "ansible.python.interpreterPath": "/usr/bin/python3.12",
+    "files.associations": {
+        "**/tasks/**/*.yml": "ansible"
+        }
+}
+```

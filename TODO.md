@@ -1,4 +1,8 @@
-# Upcoming tasks
+
+## Enhancements
+
+- Check if [Ansible](https://marketplace.visualstudio.com/items/?itemName=redhat.ansible) and [Yaml](https://marketplace.visualstudio.com/items/?itemName=redhat.vscode-yaml) VSCode extensions were mentioned in [[ansible_molecule_using_vagrant_and_virtualbox]] - might make sense for linting and auto complete
+- 
 
 ## Formatting
 
