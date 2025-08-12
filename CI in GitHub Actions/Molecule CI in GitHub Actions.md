@@ -51,7 +51,7 @@ Keep in mind that the linting is quite limited and doesn't seem check content li
 ### Workflow containing all tools
 
 We will keep using VirtualBox, Vagrant and Molecule - just like before. But this time they don't install or run on your local machine they run inside a [GitHub-Hosted-Runner](https://docs.github.com/en/actions/concepts/runners/github-hosted-runners). And since all of that belongs to Microsoft, in the Azure-Cloud, see the [documentation](https://docs.github.com/en/actions/concepts/runners/github-hosted-runners?%7B%7B%3Ccda%3E%7D%7D=#cloud-hosts-used-by-github-hosted-runners) for further details.
-We will write a `.yml` file called [Workflow](https://docs.github.com/en/actions/how-tos/write-workflows) which will describe the installation of all required tools and python packages. In this case a python virtual environment isn't necessary since the GitHub Actions run inside virtual machines are ephemeral anyway.
+We will write a YAML (`.yml`) file called [Workflow](https://docs.github.com/en/actions/how-tos/write-workflows) which will describe the installation of all required tools and python packages. In this case a python virtual environment isn't necessary since the GitHub Actions run inside virtual machines are ephemeral anyway.
 
 ### Side node on Virtual-Box
 
@@ -70,22 +70,32 @@ This is GitHub's integrated CI/CD and Automation platform, see the [docs](https:
 
 ---
 
-### Enable a Workflow
+### Create a Workflow
 
-- Create a  YAML (`.yml`) file in your repository at `<repo-root>/.github/workflows/<workflow-name>.yml`
-- GitHub expects workflow files in that exact location
+After creating and cloning the repository (assuming it's a new one), we need to create a `.yml` file inside the repository at this location.
+
+```
+<repo-root>/.github/workflows/<workflow-name>.yml
+```
+
+You might need to create some of the directories first.
+GitHub expects workflow files in that exact location and will call them only this way.
 
 ### Workflow-Structure
 
-- Suggestion: One workflow per test scenario
-- Keep generic (something with pulling role name into molecule)
-- Initially VBox only for cross platform interactive testing
-- libvirt for GH Actions
-- libvirt requires daemon which isn't allowed to install in gh actions (find source)
-- So VBox it is
-- Include badges in readme
+I will create one workflow per molecule test scenario since this allows for easy badge creating later on fir the `README.md` file.
+Depending on your use-case you might want a different structure tho.
+To keep the start simple we will walk through the first workflow in a quite *hard-coded* way before splitting the main logic into its own file later on to create a [reusable workflow](https://resources.github.com/learn/pathways/automation/intermediate/create-reusable-workflows-in-github-actions/).  
 
 ### Workflow Implementation
+
+The workflow file start - as every `.yml` file should - with `---` at the first line. I also tend to put `...` at the last line even tho it's not required.
+Next up the workflow needs a name @@TODO where is it displayed?
+
+```yaml
+---
+name: Ubuntu22.04-CI
+```
 
 - Explain workflow trigger
 - Install requirements
