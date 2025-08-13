@@ -5,8 +5,8 @@ name: getting-started-ci
 on:
   # TODO switch back to automated runs
   workflow_dispatch:
-  # push: 
-  #   branches: 
+  # push:
+  #   branches:
   #     - "draft"
   #     - "publish"
   #   paths:
@@ -15,7 +15,7 @@ on:
 
 permissions:
   contents: read
-  
+
 env:
   RES_PATH: "molecule_getting_started/resources" # also used for update identification
   # TODO change to publish

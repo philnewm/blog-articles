@@ -43,6 +43,7 @@ You will need a GitHub account, a repository and a basic understanding of the wa
 
 While not an actual requirement I can recommend using VSCode and the official [GitHub Actions](https://marketplace.visualstudio.com/items/?itemName=GitHub.vscode-github-actions) extension to see running actions and their results right in the editor interface. It also provides some level of linting while writing workflows. This way you can spot certain errors before committing, which is always nice to have.
 Keep in mind that the linting is quite limited and doesn't seem check content like bash code.
+@@ TODO check yaml extension
 
 ## Overview
 
@@ -83,22 +84,41 @@ GitHub expects workflow files in that exact location and will call them only thi
 
 ### Workflow-Structure
 
-I will create one workflow per molecule test scenario since this allows for easy badge creating later on fir the `README.md` file.
+I will create one workflow per molecule test scenario since this allows for easy workflow badge creating later on for the `README.md` file.
 Depending on your use-case you might want a different structure tho.
 To keep the start simple we will walk through the first workflow in a quite *hard-coded* way before splitting the main logic into its own file later on to create a [reusable workflow](https://resources.github.com/learn/pathways/automation/intermediate/create-reusable-workflows-in-github-actions/).  
 
 ### Workflow Implementation
 
-The workflow file start - as every `.yml` file should - with `---` at the first line. I also tend to put `...` at the last line even tho it's not required.
-Next up the workflow needs a name @@TODO where is it displayed?
+I'll provide the provide the workflow `.yml` file here in snippets and explain below them what they do. Luckily YAML files are written in a very human readable way.
 
-```yaml
----
-name: Ubuntu22.04-CI
+@@TODO switch to blog CI files
+```reference
+title: "Worklfow head"
+file: https://github.com/philnewm/ansible-gnome/blob/main/.github/workflows/ubuntu2204-ci-caller.yml
+start: 1
+end: "+18"
+fold: true
+ln: true
 ```
 
-- Explain workflow trigger
-- Install requirements
+The workflow file start with `---` at the first line, which is required for any YAML file.
+Next up the workflow needs a name, this one will show on any workflow overview so you can easily tell which workflow runs what.
+Afterward follows the workflow trigger, there are a bunch available, so check the [docs](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows). I'm just going to use the basic on-push-trigger for the `main` branch here.
+Additionally you can set a bunch of ignore paths like I did here for certain `.md` and other non-logic related files to prevent unnecessary workflow runs.
+
+```reference
+title: "Job definition"
+file: https://github.com/philnewm/ansible-role-repo-control/blob/main/.github/workflows/molecule-ci-vbox.yml
+start: 23
+end: "+4"
+fold: true
+ln: true
+```
+
+Next, the first (and in this case only) job gets defined.
+I set `molecule-ci` as the job name, which will later show up in the workflow summary.
+The `runs-on` key allows for runner selection so for Ansible I chose the `ubuntu-latest`  runner image can be found [here](https://docs.github.com/en/actions/reference/runners/github-hosted-runners#supported-runners-and-hardware-resources)
 
 ```reference
 title: "Install requirements"
