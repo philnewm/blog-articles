@@ -90,7 +90,8 @@ To keep the start simple we will walk through the first workflow in a quite *har
 
 ### Workflow Implementation
 
-I'll provide the provide the workflow `.yml` file here in snippets and explain below them what they do. Luckily YAML files are written in a very human readable way.
+I'll provide the provide the workflow `.yml` file here in snippets and explain briefly below them what they do. Fortunately the human readable and simple structure of YAML should make understanding them pretty straight foward.
+@@TODO explain usage shell scripts due to ubuntu runner
 
 @@TODO switch to blog CI files
 ```reference
@@ -101,11 +102,12 @@ end: "+18"
 fold: true
 ln: true
 ```
-
-The workflow file start with `---` at the first line, which is required for any YAML file.
-Next up the workflow needs a name, this one will show on any workflow overview so you can easily tell which workflow runs what.
-Afterward follows the workflow trigger, there are a bunch available, so check the [docs](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows). I'm just going to use the basic on-push-trigger for the `main` branch here.
-Additionally you can set a bunch of ignore paths like I did here for certain `.md` and other non-logic related files to prevent unnecessary workflow runs.
+@@TODO adjust line numbers
+@@TODO decide if caps after dash or not
+- Line 1 - Any YAML starts with  `---` at the first line
+- Line 3 - Workflow name, used as reference in several overviews
+- Line 5 ff. - Workflow trigger event, "*on push to main*"  is used here, see [other options](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows) 
+- Line 8 ff. - Ignore paths used here for `.md` and other files with config/meta information
 
 ```reference
 title: "Job definition"
@@ -116,9 +118,8 @@ fold: true
 ln: true
 ```
 
-Next, the first (and in this case only) job gets defined.
-I set `molecule-ci` as the job name, which will later show up in the workflow summary.
-The `runs-on` key allows for runner selection so for Ansible I chose the `ubuntu-latest`  runner image can be found [here](https://docs.github.com/en/actions/reference/runners/github-hosted-runners#supported-runners-and-hardware-resources)
+- Line 23 - The only job we need gets defined (*molecule-ci*) will show up in summary
+- Line 25 - GitHub runner type `ubuntu-latest`, other runner images can be found [here](https://docs.github.com/en/actions/reference/runners/github-hosted-runners#supported-runners-and-hardware-resources)
 
 ```reference
 title: "Install requirements"
@@ -130,7 +131,9 @@ fold: true
 ln: true
 ```
 
-- Set environment variables for VirtualBox @@TODO research why they are requested
+- Line 34 ff. - Run `setup-python` the workflow will install the requested python version
+- Line 45 ff. - Install Python requirements in case a `requirements.txt` file exists
+- Line 50 ff. - Install Ansible requirements in case a `requirements.yml` file exists
 
 ```reference
 title: "Set environment variables for VirtualBox"
@@ -142,8 +145,7 @@ fold: true
 ln: true
 ```
 
-- Install Virtualbox 7.1.X
-- Might fail when VirtualBox servers are down (already happened a few times to me)
+- Line 34 ff. - environment variables used by *VirtualBox* @@TODO what are they used for?
 
 ```reference
 title: "Set environment variables for VirtualBox"
@@ -155,7 +157,12 @@ fold: true
 ln: true
 ```
 
-- Install Vagrant
+- Line 82 ff. - setup *VirtualBox* repository and install *VirtualBox* 7.1.X
+- Line 89 ff. - Verify *VirtualBox* version after installation
+
+> [!warning]- Note on reliability
+> Workflow might sometimes fail when *VirtualBox* servers are down
+> already happened a few times
 
 ```reference
 title: "Set environment variables for VirtualBox"
@@ -167,7 +174,8 @@ fold: true
 ln: true
 ```
 
-- Run test scenario
+- Line 92 ff. - setup *Hashicorp* repository and install latest version of *Vagrant*
+- Line 100 ff. - verify *Vagrant* version after installation
 
 ```reference
 title: "Set environment variables for VirtualBox"
@@ -179,9 +187,12 @@ fold: true
 ln: true
 ```
 
+- Line 103 ff. - run `molecule test` for chosen scenario 
 
 These commands should be similar or even identical to the ones you ran to install Molecule and VirtualBox on your local system. Implemented in a GitHub Actions Workflow like this they will be executed each time the workflows gets triggered (e.g. on push to main) keeping the setup consistent and repeatable to run in a fully automated way.
 And due to the fact that the environment gets constructed from the ground up every time you don't need to worry about any kind of cleanups here.
+
+@@TODO explain how to re-run
 
 ## Wrap up
 
