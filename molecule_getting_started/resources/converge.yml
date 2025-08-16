@@ -6,7 +6,7 @@
   tasks:
     - name: Include role
       ansible.builtin.include_role:
-        name: "example"
+        name: "demo-molecule-example"
       vars:
         state: present
 

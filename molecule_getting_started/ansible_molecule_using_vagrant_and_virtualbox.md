@@ -208,9 +208,18 @@ namespace: my_galaxy_namespace  # if absent, author is used instead
 ```
 
 This happens due to molecule running a [role name-check](https://ansible.readthedocs.io/projects/molecule/configuration/#role-name-check) by default.
-As stated in the documentation you can either disable the check or just add the `role_name` and `namespace` to the `meta/main.yml` file.
+As stated in the documentation you can either disable the check or just add the `role_name` and `namespace` to the `meta/main.yml` file. This name is not allowed to have dashes `-`.
 
 Running `molecule create` after adding these should, while throwing a bunch of warnings, already work.
+
+> [!note]
+> Incase you get an error like `Failed to connect to the host via ssh: ssh: Could not resolve hostname` just run `molecule reset` and try again
+
+> [!warning]- `VERR_SVM_IN_USE` Error
+> This Error occurs due to the Linux Kernel loading KVM by default.
+> KVM and VirtualBox are both hypervisors but only one can run at a time.
+> Run these commands to temporarely fix this and check this [article](https://atetux.com/quick-fix-virtualbox-cant-enable-the-amd-v-extension) for further details
+
 Running `molecule list` should now show a table similar to this one.
 
 | Instance Name | Driver Name | Provisioner Name | Scenario Name | Created | Converged |
@@ -343,3 +352,5 @@ sudo modprobe -r kvm
         }
 }
 ```
+@TODO Name for "state" must be standardized
+@TODO don't run molecule as privileged user by default

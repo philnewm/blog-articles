@@ -1,24 +1,18 @@
 ---
 
-name: getting-started-ci
+name: Ubuntu2204-CI
 
 on:
-  # TODO switch back to automated runs
-  workflow_dispatch:
-  # push:
-  #   branches:
-  #     - "draft"
-  #     - "publish"
-  #   paths:
-  #     - "ansible/molecule_getting_started/resources/**"
-  #     - ".github/workflows/ansible_molecule_getting_started_ci.yml"
-
-permissions:
-  contents: read
+  push:
+    branches: [ "main" ]
+    paths-ignore:
+      - 'README.md'
+      - '**/*.md'
+      - .gitignore
+      - ./meta/main.yml
 
 env:
-  RES_PATH: "molecule_getting_started/resources" # also used for update identification
-  # TODO change to publish
+  RES_PATH: "molecule_ci_in_gh_actions/resources"
   BRANCH_REF: "draft"
   PYTHON_VERSION: "3.12"
 
@@ -27,34 +21,26 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Set up Python ${{ env.PYTHON_VERSION }}
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: true
+
+      - name: Set up Python "3.12"
         uses: actions/setup-python@v5
         with:
-          python-version: ${{ env.PYTHON_VERSION }}
+          python-version: "3.12"
 
-      - name: Install ubuntu dependencies
-        run: |
-          sudo apt-get install python3.12-venv python3-pip -y
-
-      - name: Create virtual environment
-        run: |
-          python3.12 -m venv ~/.venv/ansible_env
-          source ~/.venv/ansible_env/bin/activate
-
-      - name: Ensure global venv for this workflow
-        run: |
-          source ~/.venv/ansible_env/bin/activate
-          echo "$VIRTUAL_ENV/bin" >> $GITHUB_PATH
-          echo "VIRTUAL_ENV=$VIRTUAL_ENV" >> $GITHUB_ENV
-
+      # Only required for demo - please skip
       - name: Get requirements
         run: |
           curl -O "https://raw.githubusercontent.com/${{ github.repository }}/${{ env.BRANCH_REF }}/${{ env.RES_PATH }}/requirements.txt"
 
       - name: Install requirements
         run: |
-          pip install --upgrade pip
-          pip install -r requirements.txt
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
       - name: Set environment variables for VirtualBox
         run: |
@@ -84,7 +70,7 @@ jobs:
 
       - name: Setup role and molecule scenario
         run: |
-          ansible-galaxy role init demo-molecule-example
+          ansible-galaxy role init example
           cd example
           molecule init scenario
 
@@ -94,34 +80,34 @@ jobs:
 
       - name: Add role-name
         run: |
-          yq e '.galaxy_info.role_name = "molecule_example"' -i meta/main.yml
+          yq e '.galaxy_info.role_name = "example"' -i meta/main.yml
           yq e '.galaxy_info.namespace = "example_namespace"' -i meta/main.yml
-        working-directory: ./demo-molecule-example
+        working-directory: ./example
 
       - name: Create default instance
         run: |
           molecule create
-        working-directory: ./demo-molecule-example
+        working-directory: ./example
 
       - name: Verify default instance
         run: |
           molecule list
-        working-directory: ./demo-molecule-example
+        working-directory: ./example
 
       - name: Destroy test instance
         run: |
           molecule destroy
-        working-directory: ./demo-molecule-example
+        working-directory: ./example
 
       - name: Reset scenario
         run: |
           molecule reset
-        working-directory: ./demo-molecule-example
+        working-directory: ./example
 
       - name: Clean molecule scenario
         run: |
           rm -Rf molecule
-        working-directory: ./demo-molecule-example
+        working-directory: ./example
 
       - name: Get ressources
         run: |
@@ -130,7 +116,7 @@ jobs:
           curl -O https://raw.githubusercontent.com/${{ github.repository }}/${{ env.BRANCH_REF }}/${{ env.RES_PATH }}/verify.yml
           curl -O https://raw.githubusercontent.com/${{ github.repository }}/${{ env.BRANCH_REF }}/${{ env.RES_PATH }}/tasks.yml
           curl -O https://raw.githubusercontent.com/${{ github.repository }}/${{ env.BRANCH_REF }}/${{ env.RES_PATH }}/tests.yml
-        working-directory: ./demo-molecule-example
+        working-directory: ./example
 
       - name: Create VirtualBox Host-Only Network
         run: |
@@ -149,41 +135,41 @@ jobs:
           mv molecule.yml molecule/default/molecule.yml
           mv converge.yml molecule/default/converge.yml
           mv verify.yml molecule/default/verify.yml
-        working-directory: ./demo-molecule-example
+        working-directory: ./example
 
       - name: Create vagrant instance
         run: |
           molecule create
-        working-directory: ./demo-molecule-example
+        working-directory: ./example
 
       - name: Verify vagrant instance
         run: |
           molecule list
-        working-directory: ./demo-molecule-example
+        working-directory: ./example
 
       - name: Set role tasks
         run: |
           mv tasks.yml tasks/main.yml
-        working-directory: ./demo-molecule-example
+        working-directory: ./example
 
       - name: Converge vagrant instance
         run: |
           molecule converge
-        working-directory: ./demo-molecule-example
+        working-directory: ./example
 
       - name: Set role tests
         run: |
           mv tests.yml tasks/tests.yml
-        working-directory: ./demo-molecule-example
+        working-directory: ./example
 
       - name: Verify vagrant instance
         run: |
           molecule verify
-        working-directory: ./demo-molecule-example
+        working-directory: ./example
 
       - name: Run test
         run: |
           molecule test
-        working-directory: ./demo-molecule-example
+        working-directory: ./example
 
 ...
