@@ -86,6 +86,7 @@ After that just change the `name`, `box` and the `box_version` in `molecule/ubun
 ```reference
 title: "Worklfow head"
 file: https://github.com/philnewm/demo-molecule-example/blob/main/molecule/ubuntu2204/molecule.yml
+language: yaml
 start: 9
 end: "+2"
 fold: true
@@ -111,6 +112,7 @@ To get this Ansible role working for AlmaLinux9 and Ubuntu2204 a like I needed t
 ```reference
 title: "Worklfow head"
 file: https://github.com/philnewm/demo-molecule-example/blob/main/tasks/main.yml
+language: yaml
 start: 12
 end: "+4"
 fold: true
@@ -120,6 +122,7 @@ ln: true
 ```reference
 title: "Worklfow head"
 file: https://github.com/philnewm/demo-molecule-example/blob/main/defaults/main.yml
+language: yaml
 start: 1
 end: "+4"
 fold: true
@@ -131,6 +134,7 @@ Turns out: Depending on the OS family (AlmaLinux9 is based on RedHat, while Ubun
 ```reference
 title: "Worklfow head"
 file: https://github.com/philnewm/demo-molecule-example/blob/main/tasks/main.yml
+language: yaml
 start: 6
 end: "+5"
 fold: true
@@ -171,6 +175,7 @@ I'll provide the workflow `.yml` file here in snippets and explain briefly below
 ```reference
 title: "Worklfow head"
 file: https://github.com/philnewm/demo-molecule-example/blob/main/.github/workflows/ubuntu2204-ci.yml
+language: yaml
 start: 1
 end: "+11"
 fold: true
@@ -185,6 +190,7 @@ ln: true
 ```reference
 title: "Job definition"
 file: https://github.com/philnewm/demo-molecule-example/blob/main/.github/workflows/ubuntu2204-ci.yml
+language: yaml
 start: 14
 end: "+2"
 fold: true
@@ -197,6 +203,7 @@ ln: true
 ```reference
 title: "Install requirements"
 file: https://github.com/philnewm/demo-molecule-example/blob/main/.github/workflows/ubuntu2204-ci.yml
+language: yaml
 start: 18
 end: "+4"
 language: shell
@@ -210,9 +217,9 @@ ln: true
 ```reference
 title: "Install requirements"
 file: https://github.com/philnewm/demo-molecule-example/blob/main/.github/workflows/ubuntu2204-ci.yml
+language: yaml
 start: 24
 end: "+12"
-language: shell
 fold: true
 ln: true
 ```
@@ -224,9 +231,9 @@ ln: true
 ```reference
 title: "Set environment variables for VirtualBox"
 file: https://github.com/philnewm/demo-molecule-example/blob/main/.github/workflows/ubuntu2204-ci.yml
+language: yaml
 start: 38
 end: "+3"
-language: shell
 fold: true
 ln: true
 ```
@@ -236,9 +243,9 @@ ln: true
 ```reference
 title: "Set environment variables for VirtualBox"
 file: https://github.com/philnewm/demo-molecule-example/blob/main/.github/workflows/ubuntu2204-ci.yml
+language: yaml
 start: 43
 end: "+8"
-language: shell
 fold: true
 ln: true
 ```
@@ -253,9 +260,9 @@ ln: true
 ```reference
 title: "Set environment variables for VirtualBox"
 file: https://github.com/philnewm/demo-molecule-example/blob/main/.github/workflows/ubuntu2204-ci.yml
+language: yaml
 start: 53
 end: "+9"
-language: shell
 fold: true
 ln: true
 ```
@@ -266,9 +273,9 @@ ln: true
 ```reference
 title: "Set environment variables for VirtualBox"
 file: https://github.com/philnewm/demo-molecule-example/blob/main/.github/workflows/ubuntu2204-ci.yml
+language: yaml
 start: 64
-end: "+"
-language: shell
+end: "+2"
 fold: true
 ln: true
 ```
