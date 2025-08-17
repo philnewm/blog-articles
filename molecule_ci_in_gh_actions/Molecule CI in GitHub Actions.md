@@ -9,7 +9,7 @@ authors:
   - philipp
 date:
   created: 2025-04-12
-  updated: 2025-04-12
+  updated: 2025-08-17
 categories:
   - infrastructure
 ci: https://github.com/philnewm/demo-molecule-example/blob/main/.github/workflows/molecule-ci.yml
@@ -48,22 +48,16 @@ Keep in mind that the linting is quite limited and doesn't seem check content li
 
 ---
 
-### Workflow containing all tools
+### Tools
 
-We will keep using VirtualBox, Vagrant and Molecule - just like before. But this time they don't install or run on your local machine they run inside a [GitHub-Hosted-Runner](https://docs.github.com/en/actions/concepts/runners/github-hosted-runners). And since all of that belongs to Microsoft, in the Azure-Cloud, see the [documentation](https://docs.github.com/en/actions/concepts/runners/github-hosted-runners?%7B%7B%3Ccda%3E%7D%7D=#cloud-hosts-used-by-github-hosted-runners) for further details.
+We will keep using VirtualBox, Vagrant and Molecule - just like before. But this time they don't install or run on your local machine, they run inside a [GitHub-Hosted-Runner](https://docs.github.com/en/actions/concepts/runners/github-hosted-runners). And since all of that belongs to Microsoft, in the Azure-Cloud, see the [documentation](https://docs.github.com/en/actions/concepts/runners/github-hosted-runners?%7B%7B%3Ccda%3E%7D%7D=#cloud-hosts-used-by-github-hosted-runners) for further details.
 We will write a YAML (`.yml`) file called [Workflow](https://docs.github.com/en/actions/how-tos/write-workflows) which will describe the installation of all required tools and python packages. In this case a python virtual environment isn't necessary since the GitHub Actions run inside virtual machines are ephemeral anyway.
+Meaning they get deleted right after the run and just report back the results.
+
 ### Side node on Virtual-Box
 
-Initially I intended to run [libvirt](https://libvirt.org/) VMs in GitHub runners for a lower overhead of additional tools and install times.
-
-But *Spoiler Alert* this did not work:
-Libvirt VMs require nested virtualization which seems to be not enabled for GitHub hosted Runners. Even tho this [article](https://actuated.com/blog/kvm-in-github-actions) mentions other ways to get this going.
-Virtual-Box on the other hand works fine for me but if I ever give it another try and maybe get it working I'll add it here.
-Currently the only way I see to reduce the install and runtime overhead is using containers instead of VMs wherever possible (molecule supports it anyway) but this is a topic for another day.
-
-## GitHub Actions
-
-This is GitHub's integrated CI/CD and Automation platform, see the [docs](https://docs.github.com/en/actions/about-github-actions/understanding-github-actions) for more detailed information. As operating system version we gonna use Ubuntu 24.04 since this is the latest Linux runner image provided by GitHub at this point. See also this overview of currently available [runners and their specs](https://docs.github.com/en/actions/reference/runners/github-hosted-runners#supported-runners-and-hardware-resources) as well as the [repository](https://github.com/actions/runner-images) for their images.
+While it has the great benefit of working cross-platform (Linux, Windows, Mac) it also introduces a bottleneck and overhead.
+For now I'll stick with it since the pipeline is working well enough to develop roles but to optimize it in the future I plan on giving the [molecule-lxd driver](https://github.com/nextlayer-ansible/molecule-lxd) and the [molecule podman driver](https://ansible.readthedocs.io/projects/molecule/examples/podman/) a try. Will write about it this as soon as I got something working.
 
 ## Role Adjustments
 
@@ -71,13 +65,13 @@ This is GitHub's integrated CI/CD and Automation platform, see the [docs](https:
 
 ### Per-Distribution Scenarios
 
-To test the Ansible role against multiple distributions at in GitHub actions while keeping every run visible,  we need to add dedicated molecule scenarios.
-This simply means to add additional sub-directories in the `moelcule/` directory since this is the place it expects those.
+First we need to add dedicated molecule scenarios per distribution we want to test.
+This also ensures that all results will be easily to distinguish in GitHub Actions later on.
+This can be achieved by adding additional sub-directories in the `molecule/` directory.
 So in this case a `almalinux9` and a `ubuntu2204` sub-directory shall do it.
-Now we could just copy over all the `.yaml` files form the default scenario but this would be very inefficient.
-Instead we just copy the `molecule.yml` files, the one we actually need to adjust per scenario and symlink the others.
+Now we could just copy over all the `.yaml` files form the default scenario but this would be very inefficient. Instead we just copy the `molecule.yml` files, the one we actually need to adjust per scenario and symlink the others. This way we can just point to the `.yml` files placed inside the `default/` scenario for any files except the `molecule.yml` file
 
-From the repositories root run this neat one liner, which I split here over multiple lines or run the commands step by step.
+From the repositories root run this neat one-liner, which I split here over multiple lines or run the commands step by step.
 
 ```bash
 mkdir -p molecule/{almalinux9,ubuntu2204} && \
@@ -87,7 +81,7 @@ cp molecule/default/molecule.yml molecule/ubuntu2204/ && \
 (cd molecule/ubuntu2204 && ln -s ../default/{create,converge,verify,destroy}.yml .)
 ```
 
-After that just change the `name`, `box` and the `box_version` in `molecule/ubuntu2204/molecule.yml` to something like this, based on [vagrant cloud box](https://portal.cloud.hashicorp.com/vagrant/discover/ubuntu/jammy64)
+After that just change the `name`, `box` and the `box_version` in `molecule/ubuntu2204/molecule.yml` to something like this, based on [vagrant cloud box](https://portal.cloud.hashicorp.com/vagrant/discover/ubuntu/jammy64).
 
 ```reference
 title: "Worklfow head"
@@ -98,7 +92,7 @@ fold: true
 ln: true
 ```
 
-The result should look something like this
+The result should look something like this.
 
 ```bash
 ls -go /molecule/ubuntu2204
@@ -110,9 +104,9 @@ lrwxrwxrwx. 1  22 Aug 16 11:29 destroy.yml -> ../default/destroy.yml
 lrwxrwxrwx. 1  21 Aug 16 11:29 verify.yml -> ../default/verify.yml
 ```
 
-### Logic Adjustments
+### Role Adjustments
 
-To get this Ansible working for AlmaLinux9 and Ubuntu2204 a like I needed to implement a couple of adjustments, which mainly focus on improving the re-usability of the logic. For example the package installation now looks like this.
+To get this Ansible role working for AlmaLinux9 and Ubuntu2204 a like I needed to implement a couple of adjustments, which mainly focus on improving the re-usability of the logic. For example the package installation now looks like this.
 
 ```reference
 title: "Worklfow head"
@@ -132,7 +126,7 @@ fold: true
 ln: true
 ```
 
-Turns out Depending on the OS family (AlmaLinux9 is based on RedHat, while Ubuntu is based on Debian) the package has a different name and writing one task per option is pretty redundant. And this change needed to be applied to the `service ` task and a bunch of other places.
+Turns out: Depending on the OS family (AlmaLinux9 is based on RedHat, while Ubuntu is based on Debian) the package has a different name and writing one task per option is pretty redundant, so I added the package names into a small dictionary. This change also needed to be applied to the `service` task and a bunch of other places.
 
 ```reference
 title: "Worklfow head"
@@ -143,7 +137,13 @@ fold: true
 ln: true
 ```
 
-Other than that the Ubuntu vagrant box comes with an outdated or empty apt cache so a update task was required. Those were the critical changes, see this [commit](https://github.com/philnewm/demo-molecule-example/commit/43345557fc010a510b8c94df3a06010b150c9f55) for details
+Other than that the Ubuntu vagrant box comes with an outdated or empty apt cache so an update task was required. Those were the critical changes, see this [commit](https://github.com/philnewm/demo-molecule-example/commit/0c46254f3ad26dcb539139105cf1270bec2423e2) for details.
+
+## GitHub Actions
+
+---
+
+This is GitHub's integrated CI/CD and Automation platform, see the [docs](https://docs.github.com/en/actions/about-github-actions/understanding-github-actions) for more detailed information. As operating system version we gonna use Ubuntu 24.04 since this is the latest Linux runner image provided by GitHub at this point. See also this overview of currently available [runners and their specs](https://docs.github.com/en/actions/reference/runners/github-hosted-runners#supported-runners-and-hardware-resources) as well as the [repository](https://github.com/actions/runner-images) for their images.
 
 ## Setup
 
@@ -158,11 +158,11 @@ After creating and cloning the repository (assuming it's a new one), we need to 
 
 You might need to create some of the directories first.
 GitHub expects workflow files in that exact location and will call them only this way.
-### Workflow-Structure
+### Workflow Structure
 
-I will create one workflow per molecule test scenario since this allows for easy workflow badge creating later on for the `README.md` file.
+We will create one workflow per molecule test scenario since this allows for easy workflow badge creation later on for the `README.md` file.
 Depending on your use-case you might want a different structure tho.
-To keep the start simple we will walk through the first workflow in a quite *hard-coded* way before splitting the main logic into its own file later on to create a [reusable workflow](https://resources.github.com/learn/pathways/automation/intermediate/create-reusable-workflows-in-github-actions/).  
+To keep the start simple we will walk through the first workflow in a quite *hard-coded* way before moving the logic into its own file to create a [reusable workflow](https://resources.github.com/learn/pathways/automation/intermediate/create-reusable-workflows-in-github-actions/) in the next part.
 
 ### Workflow Implementation
 
@@ -170,7 +170,7 @@ I'll provide the workflow `.yml` file here in snippets and explain briefly below
 
 ```reference
 title: "Worklfow head"
-file: https://github.com/philnewm/demo-molecule-example/blob/main/.github/workflows/molecule-ci.yml
+file: https://github.com/philnewm/demo-molecule-example/blob/main/.github/workflows/ubuntu2204-ci.yml
 start: 1
 end: "+11"
 fold: true
@@ -179,12 +179,12 @@ ln: true
 
 - Line 1 - Any YAML starts with  `---` at the first line
 - Line 3 - Workflow name, used as reference in several overviews
-- Line 5 ff. - Workflow trigger event, "*on push to main*"  is used here, see [other options](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows) 
+- Line 5 ff. - Workflow trigger event, "*on push to main*"  is used here, see [other options](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows)
 - Line 8 ff. - Ignore paths used here for `.md` and other files with config/meta information
 
 ```reference
 title: "Job definition"
-file: https://github.com/philnewm/demo-molecule-example/blob/main/.github/workflows/molecule-ci.yml
+file: https://github.com/philnewm/demo-molecule-example/blob/main/.github/workflows/ubuntu2204-ci.yml
 start: 14
 end: "+2"
 fold: true
@@ -196,7 +196,7 @@ ln: true
 
 ```reference
 title: "Install requirements"
-file: https://github.com/philnewm/demo-molecule-example/blob/main/.github/workflows/molecule-ci.yml
+file: https://github.com/philnewm/demo-molecule-example/blob/main/.github/workflows/ubuntu2204-ci.yml
 start: 18
 end: "+4"
 language: shell
@@ -209,7 +209,7 @@ ln: true
 
 ```reference
 title: "Install requirements"
-file: https://github.com/philnewm/demo-molecule-example/blob/main/.github/workflows/molecule-ci.yml
+file: https://github.com/philnewm/demo-molecule-example/blob/main/.github/workflows/ubuntu2204-ci.yml
 start: 24
 end: "+12"
 language: shell
@@ -223,7 +223,7 @@ ln: true
 
 ```reference
 title: "Set environment variables for VirtualBox"
-file: https://github.com/philnewm/demo-molecule-example/blob/main/.github/workflows/molecule-ci.yml
+file: https://github.com/philnewm/demo-molecule-example/blob/main/.github/workflows/ubuntu2204-ci.yml
 start: 38
 end: "+3"
 language: shell
@@ -235,7 +235,7 @@ ln: true
 
 ```reference
 title: "Set environment variables for VirtualBox"
-file: https://github.com/philnewm/demo-molecule-example/blob/main/.github/workflows/molecule-ci.yml
+file: https://github.com/philnewm/demo-molecule-example/blob/main/.github/workflows/ubuntu2204-ci.yml
 start: 43
 end: "+8"
 language: shell
@@ -247,13 +247,12 @@ ln: true
 - Line 50 ff. - Verify *VirtualBox* version after installation
 
 > [!warning]- Note on reliability
-> Workflow might fail when *VirtualBox* servers are down or vagrant boxes are temporarly unavailable, already happened a few times.
-> Also sometimes the AlmaLinux9 box just fails to create for no particular reason - just restart the job
-> ![[re_run_job.png|200]]
+> Workflow might fail when *VirtualBox* servers are down or vagrant boxes are temporarly unavailable, this already happened a few times sicne I started using it.
+> Also sometimes the AlmaLinux9 box just fails to create for no particular reason - so just restart the job
 
 ```reference
 title: "Set environment variables for VirtualBox"
-file: https://github.com/philnewm/demo-molecule-example/blob/main/.github/workflows/molecule-ci.yml
+file: https://github.com/philnewm/demo-molecule-example/blob/main/.github/workflows/ubuntu2204-ci.yml
 start: 53
 end: "+9"
 language: shell
@@ -266,7 +265,7 @@ ln: true
 
 ```reference
 title: "Set environment variables for VirtualBox"
-file: https://github.com/philnewm/demo-molecule-example/blob/main/.github/workflows/molecule-ci.yml
+file: https://github.com/philnewm/demo-molecule-example/blob/main/.github/workflows/ubuntu2204-ci.yml
 start: 64
 end: "+"
 language: shell
@@ -274,12 +273,14 @@ fold: true
 ln: true
 ```
 
-- Line 64 - Run `molecule test` for chosen scenario 
+- Line 64 - Run `molecule test` for chosen scenario
 
 These commands should be similar or even identical to the ones you ran to install Molecule and VirtualBox on your local system. Implemented in a GitHub Actions Workflow like this they will be executed each time the workflows gets triggered (e.g. on push to main) keeping the setup consistent and repeatable to run in a fully automated way.
 And due to the fact that the environment gets constructed from the ground up every time you don't need to worry about any kind of cleanups here.
 
 In case a workflow run fails due to hick-ups that are not related to the current code you can simply rerun it from the workflow from the workflows summary page found under the *Actions* tab of your repository.
+
+![[re_run_job.png|200]]
 
 ## Wrap up
 
