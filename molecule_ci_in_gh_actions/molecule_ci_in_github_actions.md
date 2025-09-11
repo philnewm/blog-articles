@@ -85,7 +85,7 @@ After that just change the `name`, `box` and the `box_version` in `molecule/ubun
 
 ```reference
 title: "Worklfow head"
-file: https://github.com/philnewm/demo-molecule-example/blob/main/molecule/ubuntu2204/molecule.yml
+file: https://raw.githubusercontent.com/philnewm/demo-molecule-example/refs/heads/main/molecule/ubuntu2204/molecule.yml
 language: yaml
 start: 9
 end: "+2"
@@ -111,9 +111,9 @@ To get this Ansible role working for AlmaLinux9 and Ubuntu2204 a like I needed t
 
 ```reference
 title: "Worklfow head"
-file: https://github.com/philnewm/demo-molecule-example/blob/main/tasks/main.yml
+file: https://raw.githubusercontent.com/philnewm/demo-molecule-example/refs/heads/main/tasks/main.yml
 language: yaml
-start: 12
+start: 13
 end: "+4"
 fold: true
 ln: true
@@ -121,7 +121,7 @@ ln: true
 
 ```reference
 title: "Worklfow head"
-file: https://github.com/philnewm/demo-molecule-example/blob/main/defaults/main.yml
+file: https://raw.githubusercontent.com/philnewm/demo-molecule-example/refs/heads/main/defaults/main.yml
 language: yaml
 start: 1
 end: "+4"
@@ -133,7 +133,7 @@ Turns out: Depending on the OS family (AlmaLinux9 is based on RedHat, while Ubun
 
 ```reference
 title: "Worklfow head"
-file: https://github.com/philnewm/demo-molecule-example/blob/main/tasks/main.yml
+file: https://raw.githubusercontent.com/philnewm/demo-molecule-example/refs/heads/main/tasks/main.yml
 language: yaml
 start: 6
 end: "+5"
@@ -174,7 +174,7 @@ I'll provide the workflow `.yml` file here in snippets and explain briefly below
 
 ```reference
 title: "Worklfow head"
-file: https://github.com/philnewm/demo-molecule-example/blob/main/.github/workflows/ubuntu2204-ci.yml
+file: https://raw.githubusercontent.com/philnewm/demo-molecule-example/refs/heads/main/.github/workflows/ubuntu2204-ci.yml
 language: yaml
 start: 1
 end: "+11"
@@ -189,7 +189,7 @@ ln: true
 
 ```reference
 title: "Job definition"
-file: https://github.com/philnewm/demo-molecule-example/blob/main/.github/workflows/ubuntu2204-ci.yml
+file: https://raw.githubusercontent.com/philnewm/demo-molecule-example/refs/heads/main/.github/workflows/ubuntu2204-ci.yml
 language: yaml
 start: 14
 end: "+2"
@@ -202,11 +202,10 @@ ln: true
 
 ```reference
 title: "Install requirements"
-file: https://github.com/philnewm/demo-molecule-example/blob/main/.github/workflows/ubuntu2204-ci.yml
+file: https://raw.githubusercontent.com/philnewm/demo-molecule-example/refs/heads/main/.github/workflows/ubuntu2204-ci.yml
 language: yaml
 start: 18
 end: "+4"
-language: shell
 fold: true
 ln: true
 ```
@@ -216,7 +215,7 @@ ln: true
 
 ```reference
 title: "Install requirements"
-file: https://github.com/philnewm/demo-molecule-example/blob/main/.github/workflows/ubuntu2204-ci.yml
+file: https://raw.githubusercontent.com/philnewm/demo-molecule-example/refs/heads/main/.github/workflows/ubuntu2204-ci.yml
 language: yaml
 start: 24
 end: "+12"
@@ -230,7 +229,7 @@ ln: true
 
 ```reference
 title: "Set environment variables for VirtualBox"
-file: https://github.com/philnewm/demo-molecule-example/blob/main/.github/workflows/ubuntu2204-ci.yml
+file: https://raw.githubusercontent.com/philnewm/demo-molecule-example/refs/heads/main/.github/workflows/ubuntu2204-ci.yml
 language: yaml
 start: 38
 end: "+3"
@@ -242,7 +241,7 @@ ln: true
 
 ```reference
 title: "Set environment variables for VirtualBox"
-file: https://github.com/philnewm/demo-molecule-example/blob/main/.github/workflows/ubuntu2204-ci.yml
+file: https://raw.githubusercontent.com/philnewm/demo-molecule-example/refs/heads/main/.github/workflows/ubuntu2204-ci.yml
 language: yaml
 start: 43
 end: "+8"
@@ -259,7 +258,7 @@ ln: true
 
 ```reference
 title: "Set environment variables for VirtualBox"
-file: https://github.com/philnewm/demo-molecule-example/blob/main/.github/workflows/ubuntu2204-ci.yml
+file: https://raw.githubusercontent.com/philnewm/demo-molecule-example/refs/heads/main/.github/workflows/ubuntu2204-ci.yml
 language: yaml
 start: 53
 end: "+9"
@@ -272,7 +271,7 @@ ln: true
 
 ```reference
 title: "Set environment variables for VirtualBox"
-file: https://github.com/philnewm/demo-molecule-example/blob/main/.github/workflows/ubuntu2204-ci.yml
+file: https://raw.githubusercontent.com/philnewm/demo-molecule-example/refs/heads/main/.github/workflows/ubuntu2204-ci.yml
 language: yaml
 start: 64
 end: "+2"
