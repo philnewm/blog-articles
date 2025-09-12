@@ -14,7 +14,7 @@ categories:
   - infrastructure
 ci: https://github.com/philnewm/demo-molecule-example/blob/main/.github/workflows/molecule-ci.yml
 devto: true
-draft: true
+draft: false
 ---
 
 # Molecule CI in GitHub Actions
